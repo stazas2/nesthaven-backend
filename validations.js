@@ -5,10 +5,13 @@ export const registerValidation = [
    body('password', 'Пароль должен состоять из 5 и более символов').isLength({
       min: 5,
    }),
-   body('fullName', 'Имя должно состоять из 3 и более символов').isLength({
+   body('firstName', 'Имя должно состоять из 3 и более символов').isLength({
       min: 3,
    }),
-   body('avatarUrl', 'Картинка должна быть в виде ссылки').optional().isURL(),
+   body('lastName', 'Фамилия должна состоять из 3 и более символов').isLength({
+      min: 3,
+   }),
+   body('agree', 'Вы не согласились с условиями').optional().isBoolean(),
 ]
 
 export const loginValidation = [

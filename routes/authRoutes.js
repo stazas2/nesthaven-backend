@@ -12,7 +12,7 @@ router.post(
   UserController.login
 )
 router.post(
-  "/auth/register",
+  "/auth/create",
   registerValidation,
   handleValidationError,
   UserController.register

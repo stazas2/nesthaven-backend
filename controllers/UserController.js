@@ -7,16 +7,17 @@ export const register = async (req, res) => {
    try {
       const config = await readFileConfig()
 
-      const { email, fullName, password, avatarUrl } = req.body
+      const { firstName, lastName, email, password, agree } = req.body
 
       const salt = await bcrypt.genSalt(10)
       const passwordHash = await bcrypt.hash(password, salt)
 
       const doc = new UserModel({
+         firstName,
+         lastName,
          email,
-         fullName,
-         avatarUrl,
          passwordHash,
+         agree,
       })
 
       const user = await doc.save()
@@ -70,7 +71,7 @@ export const login = async (req, res) => {
       )
 
       // const { passwordHash: _, ...userData } = user._doc
-      const { passwordHash, ...userData } = user._doc
+      const { passwordHash: _, ...userData } = user._doc
 
       res.json({
          ...userData,
