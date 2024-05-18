@@ -19,6 +19,14 @@ export const loginValidation = [
    body('password', 'Неверный формат пароля').isLength({ min: 5 }),
 ]
 
+export const forgotValidation = [
+   body('email', 'Неверный формат почты').isEmail(),
+]
+
+export const otpValidation = [
+   body('code', 'Invalid OTP code').isLength({ min: 5, max: 5 })
+]
+
 export const postValidation = [
    body('title', 'Название статьи должно состоять из 3 и более символов')
       .isLength({ min: 3 })

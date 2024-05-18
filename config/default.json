@@ -1,0 +1,7 @@
+{
+   "MONGODB_URI": "mongodb+srv://malyshevstas03:753897dfDF@mongopract.abm0ggg.mongodb.net/testDB?retryWrites=true&w=majority&appName=MongoPract",
+   "PORT": "4000",
+   "secretKey": "secret-key-123",
+   "mail": "malyshev.stas03@mail.ru",
+   "mailPass": "zTVhN0fvbVTBD2w9iBUh"
+}
