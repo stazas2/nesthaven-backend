@@ -4,7 +4,7 @@ import multer from "multer"
 import cors from "cors"
 import config from "config"
 import { checkAuth } from "./utils/index.js"
-import { authRoutes, postRoutes } from "./routes/index.js"
+import { adminRoutes, authRoutes } from "./routes/index.js"
 
 const app = express()
 const PORT = config.PORT || 4000
@@ -35,7 +35,7 @@ app.get("/", (req, res) => {
 
 // Роуты
 app.use("/", authRoutes)
-app.use("/", postRoutes)
+app.use("/", adminRoutes)
 app.post("/upload", checkAuth, upload.single("file"), (req, res) => {
   try {
     res.json({
@@ -55,4 +55,26 @@ app.listen(PORT, (error) => {
 
   console.log("Server good working!")
 })
+
+
+
+// const app = express()
+// const router = express.Router();
+
+// // Простой маршрут для проверки
+// router.post('/public', (req, res) => {
+//   console.log('Route /api/public hit');
+//   res.send('Route is working!');
+// });
+
+// // Подключение маршрутизатора
+// app.use('/api', router);
+
+// // Запуск сервера
+// const PORT = 4000;
+// app.listen(PORT, () => {
+//   console.log(`Server is running on port ${PORT}`);
+// });
+
+
 

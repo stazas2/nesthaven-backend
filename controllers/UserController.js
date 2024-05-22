@@ -2,8 +2,7 @@ import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
 import nodemailer from "nodemailer"
 import config from "config"
-import UserModel from "../models/User.js"
-import OtpModel from "../models/Otp.js"
+import { UserModel, OtpModel } from "../models/index.js"
 import { readFileConfig, rand } from "../utils/index.js"
 
 export const register = async (req, res) => {
@@ -160,6 +159,7 @@ export const enterOtp = async (req, res) => {
     const { code } = req.body
 
     // Поиск кода в базе данных
+    //? findById
     const otp = await OtpModel.findOne({ code })
 
     if (!otp) {
@@ -169,6 +169,16 @@ export const enterOtp = async (req, res) => {
     // Проверка времени истечения
     if (new Date() > otp.expiresAt) {
       return res.status(400).json({ message: "Code has expired" })
+    }
+
+    // Проверка количества документов в коллекции
+    const count = await OtpModel.countDocuments()
+
+    // Удаление старых документов, если количество превышает лимит
+    const limit = 10
+    if (count > limit) {
+      const oldestDocuments = await OtpModel.find().limit(count - limit)
+      await OtpModel.deleteMany({ _id: { $in: oldestDocuments.map(doc => doc._id) } })
     }
 
     res.status(200).json({ message: "Code is valid" })
