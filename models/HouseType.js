@@ -1,7 +1,7 @@
-import mongoose from 'mongoose'
+import mongoose from "mongoose"
 
 const HouseTypeSchema = new mongoose.Schema(
-   {
+  {
     typeTransaction: {
       type: String,
       required: true,
@@ -32,7 +32,7 @@ const HouseTypeSchema = new mongoose.Schema(
     },
     description: {
       type: String,
-      default: '',
+      default: "",
     },
     price: {
       type: String,
@@ -46,58 +46,58 @@ const HouseTypeSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
-      typeStructure: {
-        type: String,
-        required: true,
-      },
-      numberRooms: {
-        type: String,
-        required: true,
-      },
-      generalArea: {
-        type: String,
-        required: true,
-      },
-      livingArea: {
-        type: String,
-        required: true,
-      },
-      numberFloor: {
-        type: String,
-        required: true,
-      },
-      bathroom: {
-        type: String,
-        required: true,
-      },
-      sewerage: {
-        type: String,
-        required: true,
-      },
-      waterSupply: {
-        type: String,
-        required: true,
-      },
-      gas: {
-        type: String,
-        required: true,
-      },
-      heating: {
-        type: String,
-        required: true,
-      },
-      electricity: {
-        type: String,
-        required: true,
-      },
-      additionally: {
-        type: [String],
-        required: true,
-      },
+    typeStructure: {
+      type: String,
+      required: true,
     },
-    {
-      timestamps: true,
-    }
+    numberRooms: {
+      type: String,
+      required: true,
+    },
+    generalArea: {
+      type: String,
+      required: true,
+    },
+    livingArea: {
+      type: String,
+      required: true,
+    },
+    numberFloor: {
+      type: String,
+      required: true,
+    },
+    bathroom: {
+      type: String,
+      required: true,
+    },
+    sewerage: {
+      type: String,
+      required: true,
+    },
+    waterSupply: {
+      type: String,
+      required: true,
+    },
+    gas: {
+      type: String,
+      required: true,
+    },
+    heating: {
+      type: String,
+      required: true,
+    },
+    electricity: {
+      type: String,
+      required: true,
+    },
+    additionally: {
+      type: [String],
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
 )
 
-export default mongoose.model('House', HouseTypeSchema)
+export default mongoose.model("House", HouseTypeSchema)

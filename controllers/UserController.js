@@ -159,7 +159,6 @@ export const enterOtp = async (req, res) => {
     const { code } = req.body
 
     // Поиск кода в базе данных
-    //? findById
     const otp = await OtpModel.findOne({ code })
 
     if (!otp) {
@@ -178,7 +177,9 @@ export const enterOtp = async (req, res) => {
     const limit = 10
     if (count > limit) {
       const oldestDocuments = await OtpModel.find().limit(count - limit)
-      await OtpModel.deleteMany({ _id: { $in: oldestDocuments.map(doc => doc._id) } })
+      await OtpModel.deleteMany({
+        _id: { $in: oldestDocuments.map((doc) => doc._id) },
+      })
     }
 
     res.status(200).json({ message: "Code is valid" })
