@@ -16,9 +16,9 @@ mongoose
 app.use(express.json()) //? Учим express как обработать json формат
 app.use(cors()) //? Разрешает любым доменам делать запрос к нашему backend
 
-app.get("/", (req, res) => {
-  res.send("It's backEND, baby")
-})
+// app.get("/", (req, res) => {
+//   res.send("It's backEND, baby")
+// })
 
 // Роуты
 app.use("/", authRoutes)

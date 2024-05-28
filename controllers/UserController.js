@@ -34,7 +34,7 @@ export const register = async (req, res) => {
 
     const { passwordHash: _, ...userData } = user._doc
 
-    res.json({
+    res.status(200).json({
       ...userData,
       token,
     })
@@ -75,7 +75,7 @@ export const login = async (req, res) => {
     // const { passwordHash: _, ...userData } = user._doc
     const { passwordHash: _, ...userData } = user._doc
 
-    res.json({
+    res.status(200).json({
       ...userData,
       token,
     })
@@ -87,21 +87,7 @@ export const login = async (req, res) => {
   }
 }
 
-export const getMe = async (req, res) => {
-  try {
-    const user = await UserModel.findById(req.userId)
-    if (!user) {
-      return res.status(404).json({ message: "Пользователь не найден" })
-    }
-    const { passwordHash: _, ...userData } = user._doc
-    res.json(userData)
-  } catch (err) {
-    console.log(err)
-    res.status(500).json({
-      message: "Не удалось получить пользователя",
-    })
-  }
-}
+
 
 export const forgotPass = async (req, res) => {
   try {
@@ -136,14 +122,20 @@ export const forgotPass = async (req, res) => {
       from: config.mail,
       to: email,
       subject: "Запрос на сброс пароля",
-      text: `Используйте следующий код для сброса пароля: ${code}`, // Текст письма с инструкциями для сброса пароля
+      text: `Здравствуйте, ${email}!
+
+      Мы получили запрос на отправку разового кода для вашей учетной записи Bitway.
+      
+      Ваш разовый код: ${code}
+      
+      Если вы не запрашивали этот код, можете смело игнорировать это сообщение электронной почты. Возможно, кто-то ввел ваш адрес электронной почты по ошибке.`, // Текст письма с инструкциями для сброса пароля
     }
 
     // Отправляем письмо
     await transporter.sendMail(mailOptions)
 
     // Отправляем успешный ответ
-    res
+    res 
       .status(200)
       .json({ message: "Письмо успешно отправлено на указанный адрес" })
   } catch (err) {
@@ -190,3 +182,22 @@ export const enterOtp = async (req, res) => {
     })
   }
 }
+
+//////////////////////
+export const getMe = async (req, res) => {
+  try {
+    const user = await UserModel.findById(req.userId)
+    if (!user) {
+      return res.status(404).json({ message: "Пользователь не найден" })
+    }
+    const { passwordHash: _, ...userData } = user._doc
+    res.json(userData)
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({
+      message: "Не удалось получить пользователя",
+    })
+  }
+}
+///////////////////////
+

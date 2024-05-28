@@ -43,7 +43,6 @@ const categoryValidation = [
   body("messengers", "messengers должет быть массивом").optional().isArray(),
 ]
 
-//? Проверка на кол-во в цифрах
 export const apartamentTypeValidation = [
   ...categoryValidation,
   body("typeStructure").isString(),

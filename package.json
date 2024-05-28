@@ -1,5 +1,5 @@
 {
-  "name": "fullstack_blog-app",
+  "name": "backend-biteway",
   "version": "1.0.0",
   "description": "created fullstack app on stack MERN",
   "main": "index.js",
@@ -7,7 +7,7 @@
   "scripts": {
     "server": "nodemon index.js"
   },
-  "author": "Nicola",
+  "author": "Stas",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.1",

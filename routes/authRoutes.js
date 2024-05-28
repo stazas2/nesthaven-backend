@@ -34,6 +34,8 @@ router.post(
   handleValidationError,
   UserController.enterOtp
 )
+///////////////////////
 router.get("/auth/me", checkAuth, UserController.getMe)
+///////////////////////
 
 export default router
