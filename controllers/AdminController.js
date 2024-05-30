@@ -1,20 +1,19 @@
 import {
-  ApartamentTypeModel,
-  HouseTypeModel,
-  GarageTypeModel,
-  PlotTypeModel,
-} from "../models/index.js"
-import { categoryConfig, categoryModels, extractFields } from "../utils/selectCategory.js"
+  categoryConfig,
+  categoryModels,
+  extractFields,
+} from "../utils/selectCategory.js"
 
-export const fetchDataCategory = async (req, res) => {
+export const createObject = async (req, res) => {
   try {
     const category = req.body.category
     const user = { user: req.userId }
-
     const config = categoryConfig[category]
 
     if (!config) {
-      return res.status(400).json({ message: "Invalid category" })
+      return res
+        .status(400)
+        .json({ status: "fail", message: "Invalid category" })
     }
 
     const data = config.fields.reduce((acc, field) => {
@@ -28,14 +27,14 @@ export const fetchDataCategory = async (req, res) => {
     const doc = new config.model({ ...data, ...user })
     const savedDoc = await doc.save()
 
-    res.status(200).json({ success: true, data: savedDoc })
+    res.status(200).json({ status: "success", data: savedDoc })
   } catch (err) {
     console.log(err)
-    res.status(500).json({ message: "Один из пунктов указан некорректно" })
+    res.status(500).json({ status: "fail" })
   }
 }
 
-export const getAllObjects = async (req, res) => {
+export const getAllUserObjects = async (req, res) => {
   try {
     const user = { user: `${req.userId}` }
     let objects = []
@@ -45,7 +44,7 @@ export const getAllObjects = async (req, res) => {
       //.populate("user", "_id firstname lastname")
 
       if (result.length !== 0) {
-        objects.push(result)
+        objects = objects.concat(result)
       }
     }
 
@@ -55,44 +54,38 @@ export const getAllObjects = async (req, res) => {
       })
     }
 
-    res.status(200).json(objects)
+    res.status(200).json({ status: "success", objects})
   } catch (err) {
     console.log(err)
-    res.status(500).json({ message: "Не удалось получить объекты" })
+    res.status(500).json({ status: "fail" })
   }
 }
 
-
-
 export const getOneObject = async (req, res) => {
   try {
-    // TODO 
-    //? попытаться вынести в отдельную логику, оставляя только метод поиска Id    
-    //* + deleteObject
     const objectId = req.params.id
     let object = null
-  
+
     for (let model of categoryModels) {
       object = await model.findById(objectId)
-      if (object) break 
+      if (object) break
     }
-    
+
     if (!object) {
       return res.status(404).json({
         message: "Такого объекта нет!",
       })
     }
-    //
 
     res.status(200).json({
+      status: "success",
       object,
     })
   } catch (err) {
     console.log(err)
-    res.status(500).json({ message: "Не удалось получить объект" })
+    res.status(500).json({ status: "fail"})
   }
 }
-
 
 export const deleteObject = async (req, res) => {
   try {
@@ -101,7 +94,7 @@ export const deleteObject = async (req, res) => {
 
     for (let model of categoryModels) {
       object = await model.findByIdAndDelete(objectId)
-      if (object) break 
+      if (object) break
     }
 
     if (!object) {
@@ -111,11 +104,11 @@ export const deleteObject = async (req, res) => {
     }
 
     res.status(200).json({
-      success: true,
+      status: "success",
     })
   } catch (err) {
-    console.log(err) 
-    res.status(500).json({ message: "Не удалось удалить объект" })
+    console.log(err)
+    res.status(500).json({ status: "fail" })
   }
 }
 
@@ -134,10 +127,11 @@ export const updateObject = async (req, res) => {
     )
 
     res.status(200).json({
+      status: "success",
       object,
     })
   } catch (err) {
     console.log(err)
-    res.status(500).json({ message: "Непредвиденная ошибка!" })
+    res.status(500).json({ status: "fail" })
   }
 }

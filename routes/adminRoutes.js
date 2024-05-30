@@ -7,8 +7,7 @@ const router = express.Router()
 router.get(
   "/",
   checkAuth,
-  handleValidationError,
-  AdminController.getAllObjects
+  AdminController.getAllUserObjects
 )
 
 router.get(
@@ -36,7 +35,7 @@ router.post(
   checkAuth,
   categoryRules,
   handleValidationError,
-  AdminController.fetchDataCategory
+  AdminController.createObject
 )
 
 

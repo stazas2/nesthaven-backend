@@ -34,8 +34,21 @@ router.post(
   handleValidationError,
   UserController.enterOtp
 )
-///////////////////////
+
+router.post(
+  "/auth/otp",
+  otpValidation,
+  handleValidationError,
+  UserController.enterOtp
+)
+
+router.post(
+  "/me/favoruties",
+  // checkAuth,
+  UserController.addFavorite
+)
+
 router.get("/auth/me", checkAuth, UserController.getMe)
-///////////////////////
+router.get("/properties", UserController.getAllObjects)
 
 export default router
