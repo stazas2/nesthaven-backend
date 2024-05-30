@@ -264,29 +264,29 @@ export const getAllObjects = async (req, res) => {
 //* а также удаление из избранного
 // todo
 //? продумать общую логику для избранного вместо с созданием объекта (user: '', favor: false (default))
-export const addFavorite = async (req, res) => {
-  try {
-    const objectId = req.body._id
-    const { user, category } = req.body
-    const categoryModel = categoryConfig[category].model
-    const objectToAdd = await categoryModel.findById(objectId)
+// export const addFavorite = async (req, res) => {
+//   try {
+//     const objectId = req.body._id
+//     const { user, category } = req.body
+//     const categoryModel = categoryConfig[category].model
+//     const objectToAdd = await categoryModel.findById(objectId)
 
-    const userFavourite = new UserFavouriteModel({
-      user,
-      //? id: objectId,
-      category,
-      object: objectToAdd,
-    })
+//     const userFavourite = new UserFavouriteModel({
+//       user,
+//       //? id: objectId,
+//       category,
+//       object: objectToAdd,
+//     })
 
-    await userFavourite.save()
+//     await userFavourite.save()
 
-    res.status(200).json({
-      status: "success",
-    })
-  } catch (err) {
-    console.log(err)
-    res.status(500).json({
-      status: "fail",
-    })
-  }
-}
+//     res.status(200).json({
+//       status: "success",
+//     })
+//   } catch (err) {
+//     console.log(err)
+//     res.status(500).json({
+//       status: "fail",
+//     })
+//   }
+// }

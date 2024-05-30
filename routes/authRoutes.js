@@ -42,11 +42,11 @@ router.post(
   UserController.enterOtp
 )
 
-router.post(
-  "/me/favoruties",
-  // checkAuth,
-  UserController.addFavorite
-)
+// router.post(
+//   "/me/favoruties",
+//   // checkAuth,
+//   UserController.addFavorite
+// )
 
 router.get("/auth/me", checkAuth, UserController.getMe)
 router.get("/properties", UserController.getAllObjects)
