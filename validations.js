@@ -11,7 +11,6 @@ export const registerValidation = [
   body("lastName", "Фамилия должна состоять из 3 и более символов").isLength({
     min: 3,
   }),
-  body("agree", "Вы не согласились с условиями").optional().isBoolean(),
 ]
 
 export const loginValidation = [

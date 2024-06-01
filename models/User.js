@@ -19,10 +19,6 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    agree: {
-      type: Boolean,
-      required: true,
-    },
   },
   {
     timestamps: true,

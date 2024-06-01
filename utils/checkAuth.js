@@ -1,5 +1,4 @@
 import jwt from 'jsonwebtoken';
-import readFileConfig from "./readFileConfig.js"
 
 export default async (req, res, next) => {
   const token = (req.headers.authorization || "").replace(/Bearer\s?/, "");
@@ -9,8 +8,7 @@ export default async (req, res, next) => {
   }
 
   try {
-    const config = await readFileConfig();
-    const decoded = jwt.verify(token, config.secretKey);
+    const decoded = jwt.verify(token, process.env.secretKey);
     req.userId = decoded._id;
     next();
   } catch (err) {

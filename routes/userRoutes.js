@@ -1,5 +1,5 @@
 import express from "express"
-import { UserController } from "../controllers/index.js"
+import { AdminController, UserController } from "../controllers/index.js"
 import {
   registerValidation,
   loginValidation,
@@ -36,19 +36,13 @@ router.post(
 )
 
 router.post(
-  "/auth/otp",
-  otpValidation,
-  handleValidationError,
-  UserController.enterOtp
+  "/me/favoruties",
+  // checkAuth,
+  UserController.switchFavorite
 )
-
-// router.post(
-//   "/me/favoruties",
-//   // checkAuth,
-//   UserController.addFavorite
-// )
 
 router.get("/auth/me", checkAuth, UserController.getMe)
 router.get("/properties", UserController.getAllObjects)
+router.get("/properties/:id", AdminController.getOneObject)
 
 export default router

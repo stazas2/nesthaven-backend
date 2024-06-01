@@ -2,15 +2,12 @@ import { categoryConfig, categoryModels } from "../utils/selectCategory.js"
 import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
 import nodemailer from "nodemailer"
-import config from "config"
-import { UserModel, OtpModel, UserFavouriteModel } from "../models/index.js"
-import { readFileConfig, rand } from "../utils/index.js"
+import { UserModel, OtpModel } from "../models/index.js"
+import { rand } from "../utils/index.js"
 
 export const register = async (req, res) => {
   try {
-    const config = await readFileConfig()
-
-    const { firstName, lastName, email, password, agree } = req.body
+    const { firstName, lastName, email, password } = req.body
 
     const salt = await bcrypt.genSalt(10)
     const passwordHash = await bcrypt.hash(password, salt)
@@ -20,8 +17,10 @@ export const register = async (req, res) => {
       lastName,
       email,
       passwordHash,
-      agree,
     })
+
+//todo
+//? Почему не используется метод create?
 
     const user = await doc.save()
 
@@ -29,7 +28,7 @@ export const register = async (req, res) => {
       {
         _id: user._id,
       },
-      config.secretKey,
+      process.env.secretKey,
       { expiresIn: "7d" }
     )
 
@@ -50,7 +49,6 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    const config = await readFileConfig()
     const user = await UserModel.findOne({ email: req.body.email })
 
     if (!user) {
@@ -70,7 +68,7 @@ export const login = async (req, res) => {
       {
         _id: user._id,
       },
-      config.secretKey,
+      process.env.secretKey,
       { expiresIn: "7d" }
     )
 
@@ -113,14 +111,14 @@ export const forgotPass = async (req, res) => {
       port: 587,
       secure: false,
       auth: {
-        user: config.mail,
-        pass: config.mailPass,
+        user: process.env.mail,
+        pass: process.env.mailPass,
       },
     })
 
     // Опции для отправки письма
     const mailOptions = {
-      from: config.mail,
+      from: process.env.mail,
       to: email,
       subject: "Запрос на сброс пароля",
       text: `\tЗдравствуйте, ${email}!
@@ -242,15 +240,13 @@ export const getAllObjects = async (req, res) => {
 
     res.status(200).json({
       status: "success",
-      pagination: {
-        // todo
-        //? передача страниц отдельно (учитывать лимит либо default)
-        page: _page,
-        limit: _limit,
-        amountPages: pages,
-        sort: _sort,
-        order: _order,
-      },
+      // todo
+      //? передача amountPages отдельно или optional
+      page: _page,
+      limit: _limit,
+      amountPages: pages,
+      sort: _sort,
+      order: _order,
       objects: paginateObjects,
     })
   } catch (err) {
@@ -261,32 +257,26 @@ export const getAllObjects = async (req, res) => {
   }
 }
 
-//* а также удаление из избранного
-// todo
-//? продумать общую логику для избранного вместо с созданием объекта (user: '', favor: false (default))
-// export const addFavorite = async (req, res) => {
-//   try {
-//     const objectId = req.body._id
-//     const { user, category } = req.body
-//     const categoryModel = categoryConfig[category].model
-//     const objectToAdd = await categoryModel.findById(objectId)
+export const switchFavorite = async (req, res) => {
+  try {
+    const { _id: objectId, category, favourite: favouriteValue } = req.body
+    const categoryModel = categoryConfig[category].model
 
-//     const userFavourite = new UserFavouriteModel({
-//       user,
-//       //? id: objectId,
-//       category,
-//       object: objectToAdd,
-//     })
+    await categoryModel.findByIdAndUpdate(
+      objectId,
+      { $set: { favourite: !favouriteValue } },
+      { new: true }
+    )
 
-//     await userFavourite.save()
+    res.status(200).json({
+      status: "success",
+    })
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({
+      status: "fail",
+    })
+  }
+}
 
-//     res.status(200).json({
-//       status: "success",
-//     })
-//   } catch (err) {
-//     console.log(err)
-//     res.status(500).json({
-//       status: "fail",
-//     })
-//   }
-// }
+
