@@ -12,16 +12,22 @@ export const register = async (req, res) => {
     const salt = await bcrypt.genSalt(10)
     const passwordHash = await bcrypt.hash(password, salt)
 
+    const existUser = await UserModel.findOne({ email: email })
+    if (existUser) {
+      return res
+        .status(400)
+        .json({
+          status: "fail",
+          message: "Пользователь с таким email уже существует",
+        })
+    }
+
     const doc = new UserModel({
       firstName,
       lastName,
       email,
       passwordHash,
     })
-
-//todo
-//? Почему не используется метод create?
-
     const user = await doc.save()
 
     const token = jwt.sign(
@@ -72,7 +78,6 @@ export const login = async (req, res) => {
       { expiresIn: "7d" }
     )
 
-    // const { passwordHash: _, ...userData } = user._doc
     const { passwordHash: _, ...userData } = user._doc
 
     res.status(200).json({
@@ -278,5 +283,3 @@ export const switchFavorite = async (req, res) => {
     })
   }
 }
-
-

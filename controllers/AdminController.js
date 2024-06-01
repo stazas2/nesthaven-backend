@@ -8,11 +8,10 @@ import {
 export const createObject = async (req, res) => {
   try {
     const category = req.body.category
-    const { firstName, lastName } = await UserModel.findById(req.userId)
-    const user = { user: req.userId }
+    const userId = { user: req.userId }
+    const { firstName, lastName } = await UserModel.findById(userId.user)
 
     const config = categoryConfig[category]
-
     if (!config) {
       return res
         .status(400)
@@ -27,10 +26,16 @@ export const createObject = async (req, res) => {
       return acc
     }, {})
 
-    const doc = new config.model({ ...data, ...user })
+    const doc = new config.model({ ...data, ...userId })
     const savedDoc = await doc.save()
 
-    res.status(200).json({ status: "success", fullName: `${firstName} ${lastName}`, data: savedDoc })
+    res
+      .status(200)
+      .json({
+        status: "success",
+        fullName: `${firstName} ${lastName}`,
+        data: savedDoc,
+      })
   } catch (err) {
     console.log(err)
     res.status(500).json({ status: "fail" })
@@ -43,16 +48,7 @@ export const getAllUserObjects = async (req, res) => {
 
     const promises = categoryModels.map((model) => model.find(user))
     const results = await Promise.all(promises)
-    const objects = results.flat().filter(result => result.length !== 0)
-
-    // let objects = []
-    // for (let model of categoryModels) {
-      // const result = await model.find(user)
-
-    //   if (result.length !== 0) {
-    //     objects = objects.concat(result)
-    //   }
-    // } 
+    const objects = results.filter((result) => result.length !== 0).flat()
 
     if (objects.length === 0) {
       return res.status(404).json({
@@ -83,9 +79,18 @@ export const getOneObject = async (req, res) => {
       })
     }
 
+    const { category, typeTransaction, typeObject } = object
+    const model = categoryConfig[category].model
+    const similarObjects = await model.find({
+      typeTransaction,
+      typeObject,
+      _id: { $ne: objectId },
+    })
+
     res.status(200).json({
       status: "success",
       object,
+      similarObjects,
     })
   } catch (err) {
     console.log(err)
@@ -125,14 +130,13 @@ export const updateObject = async (req, res) => {
 
     const categoryModel = categoryConfig[category].model
     const updateFields = extractFields(category, req.body)
-    
+
     const object = await categoryModel.findByIdAndUpdate(
       objectId,
       { $set: { ...updateFields } },
       { new: true }
     )
 
-    //? Обязательно ли
     if (!object) {
       return res.status(404).json({
         message: "Такого объекта нет!",

@@ -14,7 +14,7 @@ const storage = multer.diskStorage({
 })
 const upload = multer({ storage })
 
-router.use("/uploads", express.static("uploads")) 
+router.use("/uploads", express.static("uploads"))
 
 router.post("/upload", checkAuth, upload.single("file"), (req, res) => {
   try {
@@ -26,6 +26,5 @@ router.post("/upload", checkAuth, upload.single("file"), (req, res) => {
     res.status(400).json({ message: "Файл должен быть формата image" })
   }
 })
-
 
 export default router

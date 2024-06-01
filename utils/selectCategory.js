@@ -74,7 +74,12 @@ export const categoryConfig = {
   },
 }
 
-export const categoryModels = [ApartamentTypeModel, HouseTypeModel, GarageTypeModel, PlotTypeModel]
+export const categoryModels = [
+  ApartamentTypeModel,
+  HouseTypeModel,
+  GarageTypeModel,
+  PlotTypeModel,
+]
 
 // деструктуризация
 export const extractFields = (category, body) => {
