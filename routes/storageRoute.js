@@ -18,7 +18,8 @@ router.use("/uploads", express.static("uploads"))
 
 router.post("/upload", checkAuth, upload.single("file"), (req, res) => {
   try {
-    res.json({
+    res.status(200).json({
+      status: "success",
       url: `/uploads/${req.file.originalname}`,
     })
   } catch (err) {

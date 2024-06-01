@@ -140,7 +140,9 @@ export const forgotPass = async (req, res) => {
     await transporter.sendMail(mailOptions)
 
     // Отправляем успешный ответ
-    res.status(200).json({ status: "success" })
+    res
+      .status(200)
+      .json({ status: "success", message: "Письмо успешно отправлено" })
   } catch (err) {
     console.log(err)
     res.status(500).json({
@@ -178,7 +180,7 @@ export const enterOtp = async (req, res) => {
       })
     }
 
-    res.status(200).json({ status: "success" })
+    res.status(200).json({ status: "success", message: "Код подтвержден" })
   } catch (err) {
     console.log(err)
     res.status(500).json({
@@ -199,7 +201,7 @@ export const getMe = async (req, res) => {
 
     const { passwordHash: _, ...userData } = user._doc
 
-    res.json(userData)
+    res.status(200).json({ status: "success", userData })
   } catch (err) {
     console.log(err)
     res.status(500).json({
@@ -270,14 +272,24 @@ export const switchFavorite = async (req, res) => {
     const { _id: objectId, category, favourite: favouriteValue } = req.body
     const categoryModel = categoryConfig[category].model
 
-    await categoryModel.findByIdAndUpdate(
+    const object = await categoryModel.findByIdAndUpdate(
       objectId,
       { $set: { favourite: !favouriteValue } },
       { new: true }
     )
 
+    if (!object) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Такого объекта нет!",
+      })
+    }
+
     res.status(200).json({
       status: "success",
+      message: favouriteValue
+        ? "Объект удален из избранного"
+        : "Объект добавлен в избранное",
     })
   } catch (err) {
     console.log(err)
@@ -301,6 +313,7 @@ export const changePassword = async (req, res) => {
 
     res.status(200).json({
       status: "success",
+      message: "Пароль успешно изменен",
     })
   } catch (err) {
     console.log(err)

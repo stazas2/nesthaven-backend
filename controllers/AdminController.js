@@ -119,6 +119,7 @@ export const deleteObject = async (req, res) => {
 
     res.status(200).json({
       status: "success",
+      message: "Объект успешно удален",
     })
   } catch (err) {
     console.log(err)
