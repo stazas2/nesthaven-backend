@@ -14,12 +14,10 @@ export const register = async (req, res) => {
 
     const existUser = await UserModel.findOne({ email: email })
     if (existUser) {
-      return res
-        .status(400)
-        .json({
-          status: "fail",
-          message: "Пользователь с таким email уже существует",
-        })
+      return res.status(400).json({
+        status: "fail",
+        message: "Пользователь с таким email уже существует",
+      })
     }
 
     const doc = new UserModel({
@@ -58,7 +56,9 @@ export const login = async (req, res) => {
     const user = await UserModel.findOne({ email: req.body.email })
 
     if (!user) {
-      return res.status(404).json({ message: "Пользователь не найден" })
+      return res
+        .status(404)
+        .json({ status: "fail", message: "Пользователь не найден" })
     }
 
     const isValidPassword = await bcrypt.compare(
@@ -67,7 +67,9 @@ export const login = async (req, res) => {
     )
 
     if (!isValidPassword) {
-      return res.status(400).json({ message: "Неверный логин или пароль" })
+      return res
+        .status(400)
+        .json({ status: "fail", message: "Неверный логин или пароль" })
     }
 
     const token = jwt.sign(
@@ -98,7 +100,9 @@ export const forgotPass = async (req, res) => {
     const user = await UserModel.findOne({ email: req.body.email })
 
     if (!user) {
-      return res.status(404).json({ message: "Пользователь не найден" })
+      return res
+        .status(404)
+        .json({ status: "fail", message: "Пользователь не найден" })
     }
 
     const { email } = req.body
@@ -136,9 +140,7 @@ export const forgotPass = async (req, res) => {
     await transporter.sendMail(mailOptions)
 
     // Отправляем успешный ответ
-    res
-      .status(200)
-      .json({ message: "Письмо успешно отправлено на указанный адрес" })
+    res.status(200).json({ status: "success" })
   } catch (err) {
     console.log(err)
     res.status(500).json({
@@ -165,7 +167,6 @@ export const enterOtp = async (req, res) => {
         .json({ status: "fail", message: "Code has expired" })
     }
 
-    // Проверка количества документов в коллекции
     const count = await OtpModel.countDocuments()
 
     // Удаление старых документов, если количество превышает лимит
@@ -191,7 +192,9 @@ export const getMe = async (req, res) => {
     const user = await UserModel.findById(req.userId)
 
     if (!user) {
-      return res.status(404).json({ message: "Пользователь не найден" })
+      return res
+        .status(404)
+        .json({ status: "fail", message: "Пользователь не найден" })
     }
 
     const { passwordHash: _, ...userData } = user._doc
@@ -271,6 +274,29 @@ export const switchFavorite = async (req, res) => {
       objectId,
       { $set: { favourite: !favouriteValue } },
       { new: true }
+    )
+
+    res.status(200).json({
+      status: "success",
+    })
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({
+      status: "fail",
+    })
+  }
+}
+
+export const changePassword = async (req, res) => {
+  try {
+    const { email, password } = req.body
+
+    const salt = await bcrypt.genSalt(10)
+    const newPasswordHash = await bcrypt.hash(password, salt)
+
+    await UserModel.findOneAndUpdate(
+      { email },
+      { $set: { passwordHash: newPasswordHash } }
     )
 
     res.status(200).json({

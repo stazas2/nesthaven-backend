@@ -6,7 +6,7 @@ import {
   forgotValidation,
   otpValidation,
 } from "../validations.js"
-import { handleValidationError, checkAuth } from "../utils/index.js"
+import { handleValidationError } from "../utils/index.js"
 
 const router = express.Router()
 
@@ -35,6 +35,11 @@ router.post(
   UserController.enterOtp
 )
 
-router.get("/auth/me", checkAuth, UserController.getMe)
+router.post(
+  "/auth/changePassword",
+  registerValidation[1],
+  handleValidationError,
+  UserController.changePassword
+)
 
 export default router

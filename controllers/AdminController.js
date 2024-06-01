@@ -52,6 +52,7 @@ export const getAllUserObjects = async (req, res) => {
 
     if (objects.length === 0) {
       return res.status(404).json({
+        status: "fail",
         message: "У риелтора нет недвижимостей",
       })
     }
@@ -75,6 +76,7 @@ export const getOneObject = async (req, res) => {
 
     if (!object) {
       return res.status(404).json({
+        status: "fail", 
         message: "Такого объекта нет!",
       })
     }
@@ -110,6 +112,7 @@ export const deleteObject = async (req, res) => {
 
     if (!object) {
       return res.status(404).json({
+        status: "fail", 
         message: "Такого объекта нет!",
       })
     }
@@ -139,6 +142,7 @@ export const updateObject = async (req, res) => {
 
     if (!object) {
       return res.status(404).json({
+        status: "fail", 
         message: "Такого объекта нет!",
       })
     }
