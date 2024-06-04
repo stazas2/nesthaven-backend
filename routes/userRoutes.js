@@ -1,12 +1,18 @@
 import express from "express"
 import { AdminController, UserController } from "../controllers/index.js"
-import {checkAuth} from "../utils/index.js"
+import { checkAuth } from "../utils/index.js"
 
 const router = express.Router()
 
-router.post("/favoruties", UserController.switchFavorite) // checkAuth,
-router.get("/properties", UserController.getAllObjects)
-router.get("/properties/:id", AdminController.getOneObject)
-router.get("/auth/me", checkAuth, UserController.getMe)
+router.route("/properties")
+  .post(checkAuth.optional, UserController.switchFavourite)
+  .get(UserController.getAllObjects)
+
+router.route("/properties/:id")
+  .post(UserController.switchFavourite)
+  .get(AdminController.getOneObject)
+
+router.get("/auth/me", UserController.getMe)
+router.get("/auth/me/favourites", checkAuth.optional, UserController.getFavourites)
 
 export default router

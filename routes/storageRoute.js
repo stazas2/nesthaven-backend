@@ -16,7 +16,7 @@ const upload = multer({ storage })
 
 router.use("/uploads", express.static("uploads"))
 
-router.post("/upload", checkAuth, upload.single("file"), (req, res) => {
+router.post("/upload", checkAuth.mandatory, upload.single("file"), (req, res) => {
   try {
     res.status(200).json({
       status: "success",

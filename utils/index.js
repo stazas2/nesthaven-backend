@@ -1,4 +1,4 @@
-export { default as checkAuth } from "./checkAuth.js"
+export { checkAuth } from "./checkAuth.js"
 export { default as handleValidationError } from "./handleValidationError.js"
 export { default as rand } from "./getRandomNumb.js"
 export { categoryRules } from "./categoryValidation.js"

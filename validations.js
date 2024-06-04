@@ -15,7 +15,7 @@ export const registerValidation = [
 
 export const loginValidation = [
   body("email", "Неверный формат почты").isEmail(),
-  body("password", "Неверный формат пароля").isLength({ min: 5 }),
+  body("password", "Неверный формат пароля").isLength({ min: 5 }), 
 ]
 
 export const forgotValidation = [

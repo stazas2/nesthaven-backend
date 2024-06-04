@@ -8,24 +8,13 @@ import { AdminController } from "../controllers/index.js"
 
 const router = express.Router()
 
-router.get("/admin", checkAuth, AdminController.getAllUserObjects)
-router.get("/admin/:id", checkAuth, AdminController.getOneObject)
-router.post(
-  "/admin",
-  checkAuth,
-  categoryRules,
-  handleValidationError,
-  AdminController.createObject
-)
-router.patch(
-  "/admin/:id",
-  checkAuth,
-  categoryRules,
-  handleValidationError,
-  AdminController.updateObject
-)
-router.delete("/admin/:id", checkAuth, AdminController.deleteObject)
+router.route("/admin")
+  .get(checkAuth.mandatory, AdminController.getAllUserObjects)
+  .post(checkAuth.mandatory, categoryRules, handleValidationError, AdminController.createObject);
 
-
+router.route("/admin/:id")
+  .get(checkAuth.mandatory, AdminController.getOneObject)
+  .patch(checkAuth.mandatory, categoryRules, handleValidationError, AdminController.updateObject)
+  .delete(checkAuth.mandatory, AdminController.deleteObject);
 
 export default router

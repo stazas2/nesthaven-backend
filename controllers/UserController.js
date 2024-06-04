@@ -224,11 +224,12 @@ export const getAllObjects = async (req, res) => {
     const objects = await Promise.all(
       categoryModels.map((model) => model.find())
     )
-    const filteredObjects = objects.filter((result) => result.length !== 0)
-    const flattenObjects = filteredObjects.flat()
-    const pages = Math.ceil(flattenObjects.length / _limit)
+    const filteredObjects = objects
+      .filter((result) => result.length !== 0)
+      .flat()
+    const pages = Math.ceil(filteredObjects.length / _limit)
 
-    const sortedObjects = flattenObjects.sort((a, b) => {
+    const sortedObjects = filteredObjects.sort((a, b) => {
       if (_order === "asc") {
         return a[_sort] - b[_sort]
       } else if (_order === "desc") {
@@ -267,38 +268,6 @@ export const getAllObjects = async (req, res) => {
   }
 }
 
-export const switchFavorite = async (req, res) => {
-  try {
-    const { _id: objectId, category, favourite: favouriteValue } = req.body
-    const categoryModel = categoryConfig[category].model
-
-    const object = await categoryModel.findByIdAndUpdate(
-      objectId,
-      { $set: { favourite: !favouriteValue } },
-      { new: true }
-    )
-
-    if (!object) {
-      return res.status(404).json({
-        status: "fail",
-        message: "Такого объекта нет!",
-      })
-    }
-
-    res.status(200).json({
-      status: "success",
-      message: favouriteValue
-        ? "Объект удален из избранного"
-        : "Объект добавлен в избранное",
-    })
-  } catch (err) {
-    console.log(err)
-    res.status(500).json({
-      status: "fail",
-    })
-  }
-}
-
 export const changePassword = async (req, res) => {
   try {
     const { email, password } = req.body
@@ -314,6 +283,129 @@ export const changePassword = async (req, res) => {
     res.status(200).json({
       status: "success",
       message: "Пароль успешно изменен",
+    })
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({
+      status: "fail",
+    })
+  }
+}
+
+export const switchFavourite = async (req, res) => {
+  try {
+    const user = req.userId // ID пользователя, если авторизован
+    const objectId = req.body._id
+    if (user) {
+      const { category, favourite: favouriteValue } = req.body
+
+      const categoryModel = categoryConfig[category].model
+      // Логика для авторизованного пользователя
+      const object = await categoryModel.findByIdAndUpdate(
+        objectId,
+        { $set: { favourite: !favouriteValue } },
+        { new: true }
+      )
+
+      if (!object) {
+        return res.status(404).json({
+          status: "fail",
+          message: "Такого объекта нет!",
+        })
+      }
+
+      res.status(200).json({
+        status: "success",
+        message: favouriteValue
+          ? "Объект удален из избранного"
+          : "Объект добавлен в избранное",
+      })
+    } else {
+      // Для неавторизованного пользователя
+      let favourites = req.cookies.favourites
+        ? JSON.parse(req.cookies.favourites)
+        : []
+
+      if (favourites.includes(objectId)) {
+        favourites = favourites.filter((id) => id !== objectId)
+        res.cookie("favourites", JSON.stringify(favourites), {
+          httpOnly: "success",
+          maxAge: 30 * 24 * 60 * 60 * 1000,
+        }) // 30 дней
+        return res.json({
+          success: "success",
+          message: "Объект удален из избранного",
+        })
+      } else {
+        favourites.push(objectId)
+
+        res.cookie("favourites", JSON.stringify(favourites), {
+          httpOnly: "success",
+          maxAge: 30 * 24 * 60 * 60 * 1000,
+        }) // 30 дней
+        
+        return res.json({
+          success: "success",
+          message: "Объект добавлен в избранное",
+        })
+      }
+    }
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ success: false, message: "Произошла ошибка" })
+  }
+}
+
+export const getFavourites = async (req, res) => {
+  try {
+    const userId = req.userId
+    let favouriteIds = []
+
+    if (userId) {
+      // Логика для авторизованных пользователей
+      const objects = await Promise.all(
+        categoryModels.map((model) =>
+          model.find({ user: userId, favourite: true })
+        )
+      )
+      favouriteIds = objects
+        .filter((result) => result.length !== 0)
+        .flat()
+        .map((obj) => obj._id)
+    } else {
+      // Логика для неавторизованных пользователей
+      favouriteIds = req.cookies.favourites
+        ? JSON.parse(req.cookies.favourites)
+        : []
+    }
+
+    if (favouriteIds.length === 0) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Избранные объекты не найдены",
+      })
+    }
+
+    // Получение объектов по их ID
+    const objects = await Promise.all(
+      categoryModels.map((model) => model.find({ _id: { $in: favouriteIds } }))
+    )
+
+    const favouriteObjects = objects
+      .filter((result) => result.length !== 0)
+      .flat()
+
+    if (favouriteObjects.length === 0) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Избранные объекты не найдены",
+      })
+    }
+    // Неудаляемый куки-id - "665ef09ebed3db4ebe5b892e"
+    res.status(200).json({
+      status: "success",
+      objects: favouriteObjects,
+      
     })
   } catch (err) {
     console.log(err)

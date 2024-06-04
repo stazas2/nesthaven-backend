@@ -2,6 +2,7 @@ import express from "express"
 import mongoose from "mongoose"
 import cors from "cors"
 import dotenv from "dotenv"
+import cookieParser from "cookie-parser"
 import {
   adminRoutes,
   userRoutes,
@@ -19,6 +20,7 @@ mongoose
   .then(() => console.log("DB loaded!"))
   .catch((err) => console.log("DB's not working!", err))
 
+app.use(cookieParser()); //? Позволяет работать с куками
 app.use(express.json()) //? Учим express обработать json формат
 app.use(cors()) //? Разрешает любым доменам делать запрос к нашему backend
 
