@@ -294,18 +294,31 @@ export const changePassword = async (req, res) => {
 
 export const switchFavourite = async (req, res) => {
   try {
-    const user = req.userId // ID пользователя, если авторизован
+    const user = req.userId 
     const objectId = req.body._id
     if (user) {
       const { category, favourite: favouriteValue } = req.body
 
       const categoryModel = categoryConfig[category].model
+
       // Логика для авторизованного пользователя
-      const object = await categoryModel.findByIdAndUpdate(
-        objectId,
-        { $set: { favourite: !favouriteValue } },
-        { new: true }
-      )
+      let update = {}
+      if (!favouriteValue) {
+        // Если значение favourite меняется на true
+        update = {
+          $set: { favourite: !favouriteValue },
+          $push: { favouriteUser: user },
+        }
+      } else {
+        // Если значение favourite меняется на false
+        update = {
+          $set: { favourite: !favouriteValue },
+        }
+      }
+
+      const object = await categoryModel.findByIdAndUpdate(objectId, update, {
+        new: true,
+      })
 
       if (!object) {
         return res.status(404).json({
@@ -343,7 +356,7 @@ export const switchFavourite = async (req, res) => {
           httpOnly: "success",
           maxAge: 30 * 24 * 60 * 60 * 1000,
         }) // 30 дней
-        
+
         return res.json({
           success: "success",
           message: "Объект добавлен в избранное",
@@ -365,9 +378,10 @@ export const getFavourites = async (req, res) => {
       // Логика для авторизованных пользователей
       const objects = await Promise.all(
         categoryModels.map((model) =>
-          model.find({ user: userId, favourite: true })
+          model.find({ favouriteUser: userId, favourite: true })
         )
       )
+
       favouriteIds = objects
         .filter((result) => result.length !== 0)
         .flat()
@@ -405,7 +419,6 @@ export const getFavourites = async (req, res) => {
     res.status(200).json({
       status: "success",
       objects: favouriteObjects,
-      
     })
   } catch (err) {
     console.log(err)

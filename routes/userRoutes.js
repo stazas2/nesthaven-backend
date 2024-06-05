@@ -9,10 +9,10 @@ router.route("/properties")
   .get(UserController.getAllObjects)
 
 router.route("/properties/:id")
-  .post(UserController.switchFavourite)
+  .post(checkAuth.optional, UserController.switchFavourite)
   .get(AdminController.getOneObject)
 
-router.get("/auth/me", UserController.getMe)
+router.get("/auth/me", checkAuth.mandatory, UserController.getMe)
 router.get("/auth/me/favourites", checkAuth.optional, UserController.getFavourites)
 
 export default router

@@ -107,6 +107,10 @@ const ApartamentTypeSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    favouriteUser:{
+      type: [String],
+      default: [],
+    },
   },
   {
     timestamps: true,

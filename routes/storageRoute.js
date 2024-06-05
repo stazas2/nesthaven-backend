@@ -16,11 +16,13 @@ const upload = multer({ storage })
 
 router.use("/uploads", express.static("uploads"))
 
-router.post("/upload", checkAuth.mandatory, upload.single("file"), (req, res) => {
+router.post("/admin", checkAuth.mandatory, upload.single("file"), (req, res) => {
   try {
     res.status(200).json({
       status: "success",
       url: `/uploads/${req.file.originalname}`,
+      // todo
+      // url: `/admin/${req.file.originalname}`,
     })
   } catch (err) {
     console.log(err)
