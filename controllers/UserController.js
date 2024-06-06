@@ -127,13 +127,19 @@ export const forgotPass = async (req, res) => {
 
     // Опции для отправки письма
     const mailOptions = {
-      from: process.env.mail,
+      from: `"Bitway Support" <${process.env.mail}>`,
       to: email,
       subject: "Запрос на сброс пароля",
-      text: `\tЗдравствуйте, ${email}!
-      \nМы получили запрос на отправку разового кода для вашей учетной записи Bitway.
-      \nВаш разовый код: ${code}
-      \nЕсли вы не запрашивали этот код, можете смело игнорировать это сообщение электронной почты. Возможно, кто-то ввел ваш адрес электронной почты по ошибке.`,
+      html: `
+      <div style="font-family: Arial, sans-serif; color: #333;">
+        <p style="font-size: 16px;">Здравствуйте, ${user.firstName}!</p>
+        <p>Мы получили запрос на отправку разового кода для вашей учетной записи Bitway.</p>
+        <p style="font-size: 18px;"><strong>Ваш разовый код: <span style="color: #e74c3c;">${code}</span></strong></p>
+        <p>Если вы не запрашивали этот код, можете смело игнорировать это сообщение электронной почты. Возможно, кто-то ввел ваш адрес электронной почты по ошибке.</p>
+        <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;">
+        <p style="font-size: 12px; color: #777;">С уважением, <br> Команда Bitway</p>
+      </div>
+    `,
     }
 
     // Отправляем письмо
@@ -209,6 +215,12 @@ export const getMe = async (req, res) => {
     })
   }
 }
+
+////////////! Раздел для User (не auth) ////////////
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
 
 export const getAllObjects = async (req, res) => {
   try {
@@ -294,7 +306,7 @@ export const changePassword = async (req, res) => {
 
 export const switchFavourite = async (req, res) => {
   try {
-    const user = req.userId 
+    const user = req.userId
     const objectId = req.body._id
     if (user) {
       const { category, favourite: favouriteValue } = req.body

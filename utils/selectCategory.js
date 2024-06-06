@@ -84,14 +84,12 @@ export const categoryModels = [
 
 // деструктуризация
 export const extractFields = (category, body) => {
-  const fields = categoryConfig[category].fields
-  const extracted = {}
-
-  fields.forEach((field) => {
+  const fields = categoryConfig[category].fields;
+  return fields.reduce((acc, field) => {
     if (body[field] !== undefined) {
-      extracted[field] = body[field]
+      acc[field] = body[field];
     }
-  })
+    return acc;
+  }, {});
+};
 
-  return extracted
-}

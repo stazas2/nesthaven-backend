@@ -31,7 +31,7 @@ const categoryValidation = [
   body("typeObject").isString(),
   body("category").isString(),
   body("location", "Локация должна состоять из 5 и более символов").isLength({
-    max: 5,
+    min: 5,
   }),
   body("photos", "photos должет быть массивом").optional().isArray(),
   body("plans", "plans должет быть массивом").optional().isArray(),
