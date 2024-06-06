@@ -58,20 +58,14 @@ export const getAllUserObjects = async (req, res) => {
 export const getOneObject = async (req, res) => {
   try {
     const objectId = req.params.id
-    // todo
-    //? делать ли поиск по user, если отображаемые объекты и так относятся к этому пользователю
-    //* или оставлять для того, чтобы др пользователи в админке не могли получить доступ к объекту через URL-адрес
     const user = req.userId
     let object = null
 
-    for (let model of categoryModels) {
-      if (user) {
+      for (let model of categoryModels) {
         object = await model.findOne({ user, _id: objectId })
-      } else {
-        object = await model.findById(objectId)
+        if (object) break
       }
-      if (object) break
-    }
+
 
     if (!object) {
       return res.status(404).json({
@@ -80,18 +74,9 @@ export const getOneObject = async (req, res) => {
       })
     }
 
-    const { category, typeTransaction, typeProperty } = object
-    const model = categoryConfig[category].model
-    const similarObjects = await model.find({
-      typeTransaction,
-      typeProperty,
-      _id: { $ne: objectId },
-    })
-
     res.status(200).json({
       status: "success",
-      object,
-      similarObjects,
+      object, 
     })
   } catch (err) {
     console.log(err)
@@ -268,8 +253,8 @@ export const deleteArchiveObject = async (req, res) => {
 export const getListLocation = async (req, res) => {
   try {
     const detailedLocation = {
-      "Бендеры": ["Центр", "Ленинский", "Солнечный", "Борисовка"],
-      "Тирасполь": ["Центр", "Западный", "Мечникова", "Бородинка", "Южный"],
+      Бендеры: ["Центр", "Ленинский", "Солнечный", "Борисовка"],
+      Тирасполь: ["Центр", "Западный", "Мечникова", "Бородинка", "Южный"],
       "Григориопольский р-н": ["Глиное", "Маяк", "Спея"],
       "Дубоссарский р-н": ["Дубоссары", "Кошница", "Ливада", "Новосадовый"],
       "Каменский р-н": [

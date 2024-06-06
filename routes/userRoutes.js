@@ -10,7 +10,7 @@ router.route("/properties")
 
 router.route("/properties/:id")
   .post(checkAuth.optional, UserController.switchFavourite)
-  .get(AdminController.getOneObject)
+  .get(UserController.getOneObject)
 
 router.get("/auth/me", checkAuth.mandatory, UserController.getMe)
 router.get("/auth/me/favourites", checkAuth.optional, UserController.getFavourites)

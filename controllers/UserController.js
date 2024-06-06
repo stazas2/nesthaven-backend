@@ -280,6 +280,43 @@ export const getAllObjects = async (req, res) => {
   }
 }
 
+export const getOneObject = async (req, res) => {
+  try {
+    const objectId = req.params.id
+    let object = null
+
+    for (let model of categoryModels) {
+      object = await model.findById(objectId)
+      if (object) break
+    }
+
+    if (!object) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Такого объекта нет!",
+      })
+    }
+
+    // Similar objects
+    const { category, typeTransaction, typeProperty } = object
+    const model = categoryConfig[category].model
+    const similarObjects = await model.find({
+      typeTransaction,
+      typeProperty,
+      _id: { $ne: objectId },
+    })
+
+    res.status(200).json({
+      status: "success",
+      object,
+      similarObjects,
+    })
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({ status: "fail" })
+  }
+}
+
 export const changePassword = async (req, res) => {
   try {
     const { email, password } = req.body
