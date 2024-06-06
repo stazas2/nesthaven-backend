@@ -61,11 +61,10 @@ export const getOneObject = async (req, res) => {
     const user = req.userId
     let object = null
 
-      for (let model of categoryModels) {
-        object = await model.findOne({ user, _id: objectId })
-        if (object) break
-      }
-
+    for (let model of categoryModels) {
+      object = await model.findOne({ user, _id: objectId })
+      if (object) break
+    }
 
     if (!object) {
       return res.status(404).json({
@@ -76,7 +75,7 @@ export const getOneObject = async (req, res) => {
 
     res.status(200).json({
       status: "success",
-      object, 
+      object,
     })
   } catch (err) {
     console.log(err)
