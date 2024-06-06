@@ -80,11 +80,11 @@ export const getOneObject = async (req, res) => {
       })
     }
 
-    const { category, typeTransaction, typeObject } = object
+    const { category, typeTransaction, typeProperty } = object
     const model = categoryConfig[category].model
     const similarObjects = await model.find({
       typeTransaction,
-      typeObject,
+      typeProperty,
       _id: { $ne: objectId },
     })
 

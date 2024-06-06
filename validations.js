@@ -28,7 +28,7 @@ export const otpValidation = [
 
 const categoryValidation = [
   body("typeTransaction").isString(),
-  body("typeObject").isString(),
+  body("typeProperty").isString(),
   body("category").isString(),
   body("location", "Локация должна состоять из 5 и более символов").isLength({
     min: 5,

@@ -16,18 +16,25 @@ const upload = multer({ storage })
 
 router.use("/uploads", express.static("uploads"))
 
-router.post("/admin/upload", checkAuth.mandatory, upload.single("file"), (req, res) => {
-  try {
-    res.status(200).json({
-      status: "success",
-      url: `/uploads/${req.file.originalname}`,
-      // todo
-      // url: `/admin/${req.file.originalname}`,
-    })
-  } catch (err) {
-    console.log(err)
-    res.status(400).json({ status: "fail", message: "Файл должен быть формата image" })
+router.post(
+  "/admin/upload",
+  checkAuth.mandatory,
+  upload.single("file"),
+  (req, res) => {
+    try {
+      res.status(200).json({
+        status: "success",
+        url: `/uploads/${req.file.originalname}`,
+        // todo
+        // url: `/admin/${req.file.originalname}`,
+      })
+    } catch (err) {
+      console.log(err)
+      res
+        .status(400)
+        .json({ status: "fail", message: "Файл должен быть формата image" })
+    }
   }
-})
+)
 
 export default router

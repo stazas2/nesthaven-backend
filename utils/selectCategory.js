@@ -7,7 +7,7 @@ import {
 
 const sameFields = [
   "typeTransaction",
-  "typeObject",
+  "typeProperty",
   "category",
   "location",
   "photos",

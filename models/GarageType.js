@@ -11,7 +11,7 @@ const GarageTypeSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    typeObject: {
+    typeProperty: {
       type: String,
       required: true,
     },
