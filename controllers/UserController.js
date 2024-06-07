@@ -165,19 +165,20 @@ export const enterOtp = async (req, res) => {
     const otp = await OtpModel.findOne({ code })
 
     if (!otp) {
-      return res.status(400).json({ status: "fail", message: "Invalid code" })
+      return res.status(400).json({ status: "fail", message: "Неверный код" })
     }
 
     // Проверка времени истечения
     if (new Date() > otp.expiresAt) {
       return res
         .status(400)
-        .json({ status: "fail", message: "Code has expired" })
+        .json({ status: "fail", message: "Код истёк" })
     }
 
     const count = await OtpModel.countDocuments()
 
-    // Удаление старых документов, если количество превышает лимит
+    //  todo
+    //? Удаление старых документов, если количество превышает лимит
     const limit = 10
     if (count > limit) {
       const oldestDocuments = await OtpModel.find().limit(count - limit)
@@ -255,9 +256,9 @@ export const getAllObjects = async (req, res) => {
     )
 
     if (paginateObjects.length === 0) {
-      return res.status(404).json({
-        status: "fail",
-        message: "Objects not found",
+      return res.status(200).json({
+        status: "success",
+        paginateObjects,
       })
     }
 

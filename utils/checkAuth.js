@@ -1,5 +1,5 @@
-import jwt from "jsonwebtoken"
 import { UserModel } from "../models/index.js";
+import jwt from "jsonwebtoken"
 
 export const checkAuth = {
   mandatory: async (req, res, next) => {
