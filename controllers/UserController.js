@@ -170,9 +170,7 @@ export const enterOtp = async (req, res) => {
 
     // Проверка времени истечения
     if (new Date() > otp.expiresAt) {
-      return res
-        .status(400)
-        .json({ status: "fail", message: "Код истёк" })
+      return res.status(400).json({ status: "fail", message: "Код истёк" })
     }
 
     const count = await OtpModel.countDocuments()
@@ -256,14 +254,13 @@ export const getAllObjects = async (req, res) => {
       })
     }
 
+    const exludeUserFields = "-passwordHash -__v -createdAt -updatedAt"
     const paginateObjectsWithUser = await Promise.all(
       paginateObjects.map(async (object) => {
-        const user = await UserModel.findById(object.user).select(
-          "-passwordHash -__v -createdAt -updatedAt"
-        );
-        return { ...object._doc, user };
+        const user = await UserModel.findById(object.user).select(exludeUserFields)
+        return { ...object._doc, user }
       })
-    );
+    )
 
     res.status(200).json({
       status: "success",
@@ -299,7 +296,8 @@ export const getOneObject = async (req, res) => {
       })
     }
 
-    const user = await UserModel.findById(object.user).select('-passwordHash -__v -createdAt -updatedAt');
+    const exludeUserFields = "-passwordHash -__v -createdAt -updatedAt"
+    const user = await UserModel.findById(object.user).select(exludeUserFields)
 
     // Similar objects
     const { category, typeTransaction, typeProperty } = object
@@ -312,17 +310,15 @@ export const getOneObject = async (req, res) => {
 
     const similarObjectsWithUser = await Promise.all(
       similarObjects.map(async (object) => {
-        const user = await UserModel.findById(object.user).select(
-          "-passwordHash -__v -createdAt -updatedAt"
-        );
-        return { ...object._doc, user };
+        const user = await UserModel.findById(object.user).select(exludeUserFields)
+        return { ...object._doc, user }
       })
-    );
+    )
 
     res.status(200).json({
       status: "success",
       object: { ...object._doc, user },
-      similarObjectsWithUser,
+      similarObjects: similarObjectsWithUser,
     })
   } catch (err) {
     console.log(err)
