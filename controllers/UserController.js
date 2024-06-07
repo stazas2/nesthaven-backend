@@ -256,7 +256,7 @@ export const getAllObjects = async (req, res) => {
       })
     }
 
-    const objectsWithUserDetails = await Promise.all(
+    const paginateObjectsWithUser = await Promise.all(
       paginateObjects.map(async (object) => {
         const user = await UserModel.findById(object.user).select(
           "-passwordHash -__v -createdAt -updatedAt"
@@ -272,7 +272,7 @@ export const getAllObjects = async (req, res) => {
       amountPages: pages,
       sort: _sort,
       order: _order,
-      objects: objectsWithUserDetails,
+      objects: paginateObjectsWithUser,
     })
   } catch (err) {
     console.log(err)
@@ -299,6 +299,8 @@ export const getOneObject = async (req, res) => {
       })
     }
 
+    const user = await UserModel.findById(object.user).select('-passwordHash -__v -createdAt -updatedAt');
+
     // Similar objects
     const { category, typeTransaction, typeProperty } = object
     const model = categoryConfig[category].model
@@ -308,10 +310,19 @@ export const getOneObject = async (req, res) => {
       _id: { $ne: objectId },
     })
 
+    const similarObjectsWithUser = await Promise.all(
+      similarObjects.map(async (object) => {
+        const user = await UserModel.findById(object.user).select(
+          "-passwordHash -__v -createdAt -updatedAt"
+        );
+        return { ...object._doc, user };
+      })
+    );
+
     res.status(200).json({
       status: "success",
-      object,
-      similarObjects,
+      object: { ...object._doc, user },
+      similarObjectsWithUser,
     })
   } catch (err) {
     console.log(err)
