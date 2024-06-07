@@ -9,7 +9,6 @@ export const createObject = async (req, res) => {
   try {
     const category = req.body.category
     const userId = { user: req.userId }
-    const { firstName, lastName } = await UserModel.findById(userId.user)
 
     const config = categoryConfig[category]
     if (!config) {
@@ -24,7 +23,6 @@ export const createObject = async (req, res) => {
 
     res.status(200).json({
       status: "success",
-      fullName: `${firstName} ${lastName}`,
       data: savedDoc,
     })
   } catch (err) {

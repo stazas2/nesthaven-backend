@@ -217,12 +217,6 @@ export const getMe = async (req, res) => {
   }
 }
 
-////////////! Раздел для User (не auth) ////////////
-//////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////
-
 export const getAllObjects = async (req, res) => {
   try {
     const {
@@ -262,16 +256,23 @@ export const getAllObjects = async (req, res) => {
       })
     }
 
+    const objectsWithUserDetails = await Promise.all(
+      paginateObjects.map(async (object) => {
+        const user = await UserModel.findById(object.user).select(
+          "-passwordHash -__v -createdAt -updatedAt"
+        );
+        return { ...object._doc, user };
+      })
+    );
+
     res.status(200).json({
       status: "success",
-      // todo
-      //? передача amountPages отдельно или optional
       page: _page,
       limit: _limit,
       amountPages: pages,
       sort: _sort,
       order: _order,
-      objects: paginateObjects,
+      objects: objectsWithUserDetails,
     })
   } catch (err) {
     console.log(err)
