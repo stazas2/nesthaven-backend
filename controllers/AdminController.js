@@ -44,7 +44,7 @@ export const getAllUserObjects = async (req, res) => {
     if (objects.length === 0) {
       return res.status(200).json({
         status: "success",
-        message: "У риелтора нет недвижимостей",
+        objects,
       })
     }
 
