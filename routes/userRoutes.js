@@ -9,7 +9,6 @@ router.route("/properties")
   .get(UserController.getAllObjects)
 
 router.route("/properties/:id")
-  .post(checkAuth.optional, UserController.switchFavourite)
   .get(UserController.getOneObject)
 
 router.get("/auth/me", checkAuth.mandatory, UserController.getMe)

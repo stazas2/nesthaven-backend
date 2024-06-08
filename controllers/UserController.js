@@ -452,9 +452,9 @@ export const getFavourites = async (req, res) => {
     }
 
     if (favouriteIds.length === 0) {
-      return res.status(404).json({
-        status: "fail",
-        message: "Избранные объекты не найдены",
+      return res.status(200).json({
+        status: "success",
+        favouriteIds
       })
     }
 
