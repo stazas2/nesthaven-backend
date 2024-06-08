@@ -229,13 +229,15 @@ export const deleteArchiveObject = async (req, res) => {
         message: "Такого объекта нет!",
       })
     }
-    await ArhiveModel.findByIdAndDelete(objectId)
+    
 
     const { category } = object[0]
     const categoryModel = categoryConfig[category].model
 
     const unArchiveObject = new categoryModel({ ...object[0].toObject() })
     await unArchiveObject.save()
+
+    await ArhiveModel.findByIdAndDelete(objectId)
 
     res.status(200).json({
       status: "success",
@@ -247,11 +249,11 @@ export const deleteArchiveObject = async (req, res) => {
   }
 }
 
-export const getListLocation = async (req, res) => {
+export const getPropertyInfo = async (req, res) => {
   try {
     const detailedLocation = {
-      Бендеры: ["Центр", "Ленинский", "Солнечный", "Борисовка"],
-      Тирасполь: ["Центр", "Западный", "Мечникова", "Бородинка", "Южный"],
+      "Бендеры": ["Центр", "Ленинский", "Солнечный", "Борисовка"],
+      "Тирасполь": ["Центр", "Западный", "Мечникова", "Бородинка", "Южный"],
       "Григориопольский р-н": ["Глиное", "Маяк", "Спея"],
       "Дубоссарский р-н": ["Дубоссары", "Кошница", "Ливада", "Новосадовый"],
       "Каменский р-н": [
@@ -274,7 +276,7 @@ export const getListLocation = async (req, res) => {
 
     res.status(200).json({
       status: "success",
-      detailedLocation,
+      location: detailedLocation,
     })
   } catch (err) {
     console.log(err)

@@ -21,7 +21,7 @@ router.route("/admin")
   .get(checkAuth.mandatory, AdminController.getAllUserObjects)
   .post(checkAuth.mandatory, categoryRules, handleValidationError, AdminController.createObject)
 
-router.get("/admin/location", AdminController.getListLocation)
+router.get("/admin/location", AdminController.getPropertyInfo)
 
 router.post("/admin/addArchive", checkAuth.mandatory, AdminController.archiveObject)
 router.get("/admin/archive", checkAuth.mandatory, AdminController.getArchiveObjects)

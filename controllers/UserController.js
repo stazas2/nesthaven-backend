@@ -365,7 +365,7 @@ export const switchFavourite = async (req, res) => {
         // Если значение favourite меняется на true
         update = {
           $set: { favourite: !favouriteValue },
-          $push: { favouriteUser: user },
+          $addToSet: { favouriteUser: user },
         }
       } else {
         // Если значение favourite меняется на false

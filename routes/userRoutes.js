@@ -15,4 +15,6 @@ router.route("/properties/:id")
 router.get("/auth/me", checkAuth.mandatory, UserController.getMe)
 router.get("/auth/me/favourites", checkAuth.optional, UserController.getFavourites)
 
+router.get("/location", AdminController.getPropertyInfo)
+
 export default router
