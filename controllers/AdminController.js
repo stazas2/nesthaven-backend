@@ -18,12 +18,11 @@ export const createObject = async (req, res) => {
     }
 
     const data = extractFields(category, req.body)
-    const doc = new config.model({ ...data, ...userId })
-    const savedDoc = await doc.save()
+    const doc = await new config.model({ ...data, ...userId }).save()
 
     res.status(200).json({
       status: "success",
-      data: savedDoc,
+      data: doc,
     })
   } catch (err) {
     console.log(err)
@@ -156,9 +155,10 @@ export const archiveObject = async (req, res) => {
       })
     }
 
-    const archive = new ArhiveModel({ ...object.toObject() })
-    await archive.save()
+    // Сохранение объекта в архив
+    await new ArhiveModel({ ...object.toObject() }).save()
 
+    // Удаление из общего списка
     await categoryModel.findByIdAndDelete(objectId)
 
     res.status(200).json({
@@ -234,9 +234,7 @@ export const deleteArchiveObject = async (req, res) => {
     const { category } = object[0]
     const categoryModel = categoryConfig[category].model
 
-    const unArchiveObject = new categoryModel({ ...object[0].toObject() })
-    await unArchiveObject.save()
-
+    await new categoryModel({ ...object[0].toObject() }).save()
     await ArhiveModel.findByIdAndDelete(objectId)
 
     res.status(200).json({

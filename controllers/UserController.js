@@ -110,8 +110,10 @@ export const forgotPass = async (req, res) => {
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000) // Время истечения
 
     // Сохранение кода в базе данных
-    const otp = new OtpModel({ email, code, expiresAt })
-    await otp.save()
+    await new OtpModel({ email, code, expiresAt, expires: 5 }).save()
+
+    //todo
+    //? вынести отправку письма в отдельную логику
 
     // Создаем транспорт для отправки почты
     const transporter = nodemailer.createTransport({
@@ -127,17 +129,17 @@ export const forgotPass = async (req, res) => {
 
     // Опции для отправки письма
     const mailOptions = {
-      from: `"Bitway Support" <${process.env.mail}>`,
+      from: `"NestHaven Support" <${process.env.mail}>`,
       to: email,
       subject: "Запрос на сброс пароля",
       html: `
       <div style="font-family: Arial, sans-serif; color: #333;">
         <p style="font-size: 16px;">Здравствуйте, ${user.firstName}!</p>
-        <p>Мы получили запрос на отправку разового кода для вашей учетной записи Bitway.</p>
+        <p>Мы получили запрос на отправку разового кода для вашей учетной записи NestHaven.</p>
         <p style="font-size: 18px;"><strong>Ваш разовый код: <span style="color: #e74c3c;">${code}</span></strong></p>
         <p>Если вы не запрашивали этот код, можете смело игнорировать это сообщение электронной почты. Возможно, кто-то ввел ваш адрес электронной почты по ошибке.</p>
         <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;">
-        <p style="font-size: 12px; color: #777;">С уважением, <br> Команда Bitway</p>
+        <p style="font-size: 12px; color: #777;">С уважением, <br> Команда NestHaven</p>
       </div>
     `,
     }
@@ -160,31 +162,17 @@ export const forgotPass = async (req, res) => {
 export const enterOtp = async (req, res) => {
   try {
     const { code } = req.body
-
-    // Поиск кода в базе данных
     const otp = await OtpModel.findOne({ code })
 
-    if (!otp) {
+    // Проверка времени истечения
+    if (otp && new Date() > otp.expiresAt) {
+      await OtpModel.deleteOne({ code })
+      return res.status(400).json({ status: "fail", message: "Код истёк" })
+    } else if (!otp) {
       return res.status(400).json({ status: "fail", message: "Неверный код" })
     }
 
-    // Проверка времени истечения
-    if (new Date() > otp.expiresAt) {
-      return res.status(400).json({ status: "fail", message: "Код истёк" })
-    }
-
-    const count = await OtpModel.countDocuments()
-
-    //  todo
-    //? Удаление старых документов, если количество превышает лимит
-    const limit = 10
-    if (count > limit) {
-      const oldestDocuments = await OtpModel.find().limit(count - limit)
-      await OtpModel.deleteMany({
-        _id: { $in: oldestDocuments.map((doc) => doc._id) },
-      })
-    }
-
+    await OtpModel.deleteOne({ code })
     res.status(200).json({ status: "success", message: "Код подтвержден" })
   } catch (err) {
     console.log(err)
@@ -257,7 +245,9 @@ export const getAllObjects = async (req, res) => {
     const exludeUserFields = "-passwordHash -__v -createdAt -updatedAt"
     const paginateObjectsWithUser = await Promise.all(
       paginateObjects.map(async (object) => {
-        const user = await UserModel.findById(object.user).select(exludeUserFields)
+        const user = await UserModel.findById(object.user).select(
+          exludeUserFields
+        )
         return { ...object._doc, user }
       })
     )
@@ -310,7 +300,9 @@ export const getOneObject = async (req, res) => {
 
     const similarObjectsWithUser = await Promise.all(
       similarObjects.map(async (object) => {
-        const user = await UserModel.findById(object.user).select(exludeUserFields)
+        const user = await UserModel.findById(object.user).select(
+          exludeUserFields
+        )
         return { ...object._doc, user }
       })
     )
@@ -355,22 +347,19 @@ export const switchFavourite = async (req, res) => {
     const user = req.userId
     const objectId = req.body._id
     if (user) {
-      const { category, favourite: favouriteValue } = req.body
-
+      const { category, favouriteUser } = req.body
       const categoryModel = categoryConfig[category].model
+      let favouriteValue = true
 
-      // Логика для авторизованного пользователя
       let update = {}
-      if (!favouriteValue) {
-        // Если значение favourite меняется на true
+      if ( favouriteUser.includes(user) ) {
+        favouriteValue = false
         update = {
-          $set: { favourite: !favouriteValue },
-          $addToSet: { favouriteUser: user },
+          $pull: { favouriteUser: user },
         }
       } else {
-        // Если значение favourite меняется на false
         update = {
-          $set: { favourite: !favouriteValue },
+          $addToSet: { favouriteUser: user },
         }
       }
 
@@ -388,8 +377,8 @@ export const switchFavourite = async (req, res) => {
       res.status(200).json({
         status: "success",
         message: favouriteValue
-          ? "Объект удален из избранного"
-          : "Объект добавлен в избранное",
+          ? "Объект добавлен в избранное"
+          : "Объект удален из избранного",
       })
     } else {
       // Для неавторизованного пользователя
@@ -404,7 +393,7 @@ export const switchFavourite = async (req, res) => {
           maxAge: 30 * 24 * 60 * 60 * 1000,
         }) // 30 дней
         return res.json({
-          success: "success",
+          status: "success",
           message: "Объект удален из избранного",
         })
       } else {
@@ -416,7 +405,7 @@ export const switchFavourite = async (req, res) => {
         }) // 30 дней
 
         return res.json({
-          success: "success",
+          status: "success",
           message: "Объект добавлен в избранное",
         })
       }
@@ -436,14 +425,11 @@ export const getFavourites = async (req, res) => {
       // Логика для авторизованных пользователей
       const objects = await Promise.all(
         categoryModels.map((model) =>
-          model.find({ favouriteUser: userId, favourite: true })
+          model.find({ favouriteUser: userId }).select('_id')
         )
       )
 
-      favouriteIds = objects
-        .filter((result) => result.length !== 0)
-        .flat()
-        .map((obj) => obj._id)
+      favouriteIds = objects.flatMap(result => result.map(obj => obj._id));
     } else {
       // Логика для неавторизованных пользователей
       favouriteIds = req.cookies.favourites
@@ -454,7 +440,7 @@ export const getFavourites = async (req, res) => {
     if (favouriteIds.length === 0) {
       return res.status(200).json({
         status: "success",
-        objects: favouriteIds
+        objects: favouriteIds,
       })
     }
 
@@ -473,7 +459,7 @@ export const getFavourites = async (req, res) => {
         message: "Избранные объекты не найдены",
       })
     }
-    // Неудаляемый куки-id - "665ef09ebed3db4ebe5b892e"
+
     res.status(200).json({
       status: "success",
       objects: favouriteObjects,
@@ -485,3 +471,67 @@ export const getFavourites = async (req, res) => {
     })
   }
 }
+
+export const sendMessage = async (req, res) => {
+  try {
+    const objectId = req.params.id
+    let object = null
+
+    for (let model of categoryModels) {
+      object = await model.findById(objectId)
+      if (object) break
+    }
+
+    if (!object) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Такого объекта нет!",
+      })
+    }
+    
+    const { email: ownerEmail, firstName } = await UserModel.findById(object.user) 
+    const { name, phone, email, message } = req.body
+
+    // Создаем транспорт для отправки почты
+    const transporter = nodemailer.createTransport({
+      // Настройки для вашего почтового сервера
+      host: "smtp.mail.ru",
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.mail,
+        pass: process.env.mailPass,
+      },
+    })
+
+    // Опции для отправки письма
+    const mailOptions = {
+      from: `"NestHaven" <${process.env.mail}>`,
+      to: ownerEmail,
+      subject: "Сообщение от пользователя",
+      html: `
+      <div style="font-family: Arial, sans-serif; color: #333;">
+        <p style="font-size: 16px;">Здравствуйте, ${firstName}!<br>Вы получили сообщение от пользователя NestHaven:</p>
+        <p style="font-size: 18px;"><strong>${message}</strong></p>
+        <p style="font-size: 14px; color: #777;">${name} <br> ${phone} <br> ${email}</p>
+        <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;">
+        <p style="font-size: 12px; color: #777;">С уважением, <br> Команда NestHaven</p>
+      </div>
+    `,
+    }
+
+    // Отправляем письмо
+    await transporter.sendMail(mailOptions)
+
+    // Отправляем успешный ответ
+    res
+      .status(200)
+      .json({ status: "success", message: "Письмо успешно отправлено" })
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({
+      status: "fail",
+    })
+  }
+}
+

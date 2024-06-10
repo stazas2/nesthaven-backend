@@ -17,7 +17,6 @@ const sameFields = [
   "price",
   "phone",
   "messengers",
-  "favourite",
   "favouriteUser",
 ]
 export const categoryConfig = {
