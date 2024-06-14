@@ -194,13 +194,17 @@ export const getAllObjects = async (req, res) => {
       typeTransaction = "",
     } = req.query
 
+    const query = Object.fromEntries(
+      Object.entries(req.query).filter(([key, value]) => !key.startsWith("_"))
+    )
     const skipObjects = (_page - 1) * _limit
     const objects = await Promise.all(
-      categoryModels.map((model) => model.find(req.query)) // typeProperty ? req.query : {}
+      categoryModels.map((model) => model.find(query))
     )
     const filteredObjects = objects
       .filter((result) => result.length !== 0)
       .flat()
+
     const pages = Math.ceil(filteredObjects.length / _limit)
 
     const sortedObjects = filteredObjects.sort((a, b) => {
@@ -235,7 +239,7 @@ export const getAllObjects = async (req, res) => {
 
     res.status(200).json({
       status: "success",
-      filter: req.query,
+      filter: query,
       page: _page,
       limit: _limit,
       amountPages: pages,
@@ -333,7 +337,8 @@ export const switchFavourite = async (req, res) => {
       return res.status(400).json({
         status: "fail",
         message: "Такого объекта нет!",
-      })}
+      })
+    }
 
     if (userId) {
       const user = await UserModel.findById(userId)
