@@ -17,7 +17,6 @@ const sameFields = [
   "price",
   "phone",
   "messengers",
-  "favouriteUser",
 ]
 export const categoryConfig = {
   apartment: {

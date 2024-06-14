@@ -63,10 +63,6 @@ const GarageTypeSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    favouriteUser:{
-      type: [String],
-      default: [],
-    },
   },
   {
     timestamps: true,

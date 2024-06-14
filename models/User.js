@@ -19,6 +19,10 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    favouriteObject:{
+      type: [String],
+      default: [],
+    },
   },
   {
     timestamps: true,

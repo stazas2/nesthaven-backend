@@ -1,9 +1,8 @@
 import { categoryConfig, categoryModels } from "../utils/selectCategory.js"
 import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
-import nodemailer from "nodemailer"
 import { UserModel, OtpModel } from "../models/index.js"
-import { rand } from "../utils/index.js"
+import { rand, sendMail } from "../utils/index.js"
 
 export const register = async (req, res) => {
   try {
@@ -110,42 +109,20 @@ export const forgotPass = async (req, res) => {
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000) // Время истечения
 
     // Сохранение кода в базе данных
-    await new OtpModel({ email, code, expiresAt, expires: 5 }).save()
+    await new OtpModel({ email, code, expiresAt }).save()
 
-    //todo
-    //? вынести отправку письма в отдельную логику
-
+    let mailMessage = `
+    <div style="font-family: Arial, sans-serif; color: #333;">
+      <p style="font-size: 16px;">Здравствуйте, ${user.firstName}!</p>
+      <p>Мы получили запрос на отправку разового кода для вашей учетной записи NestHaven.</p>
+      <p style="font-size: 18px;"><strong>Ваш разовый код: <span style="color: #e74c3c;">${code}</span></strong></p>
+      <p>Если вы не запрашивали этот код, можете смело игнорировать это сообщение электронной почты. Возможно, кто-то ввел ваш адрес электронной почты по ошибке.</p>
+      <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;">
+      <p style="font-size: 12px; color: #777;">С уважением, <br> Команда NestHaven</p>
+    </div>
+  `
     // Создаем транспорт для отправки почты
-    const transporter = nodemailer.createTransport({
-      // Настройки для вашего почтового сервера
-      host: "smtp.mail.ru",
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.mail,
-        pass: process.env.mailPass,
-      },
-    })
-
-    // Опции для отправки письма
-    const mailOptions = {
-      from: `"NestHaven Support" <${process.env.mail}>`,
-      to: email,
-      subject: "Запрос на сброс пароля",
-      html: `
-      <div style="font-family: Arial, sans-serif; color: #333;">
-        <p style="font-size: 16px;">Здравствуйте, ${user.firstName}!</p>
-        <p>Мы получили запрос на отправку разового кода для вашей учетной записи NestHaven.</p>
-        <p style="font-size: 18px;"><strong>Ваш разовый код: <span style="color: #e74c3c;">${code}</span></strong></p>
-        <p>Если вы не запрашивали этот код, можете смело игнорировать это сообщение электронной почты. Возможно, кто-то ввел ваш адрес электронной почты по ошибке.</p>
-        <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;">
-        <p style="font-size: 12px; color: #777;">С уважением, <br> Команда NestHaven</p>
-      </div>
-    `,
-    }
-
-    // Отправляем письмо
-    await transporter.sendMail(mailOptions)
+    sendMail(email, "Запрос на сброс пароля", mailMessage)
 
     // Отправляем успешный ответ
     res
@@ -210,12 +187,16 @@ export const getAllObjects = async (req, res) => {
       _limit = 15,
       _sort = "createdAt",
       _order = "desc",
+      location = "",
+      price = "",
+      category = "",
+      typeProperty = "",
+      typeTransaction = "",
     } = req.query
 
     const skipObjects = (_page - 1) * _limit
-
     const objects = await Promise.all(
-      categoryModels.map((model) => model.find())
+      categoryModels.map((model) => model.find(req.query)) // typeProperty ? req.query : {}
     )
     const filteredObjects = objects
       .filter((result) => result.length !== 0)
@@ -254,6 +235,7 @@ export const getAllObjects = async (req, res) => {
 
     res.status(200).json({
       status: "success",
+      filter: req.query,
       page: _page,
       limit: _limit,
       amountPages: pages,
@@ -344,41 +326,42 @@ export const changePassword = async (req, res) => {
 
 export const switchFavourite = async (req, res) => {
   try {
-    const user = req.userId
+    const userId = req.userId
     const objectId = req.body._id
-    if (user) {
-      const { category, favouriteUser } = req.body
-      const categoryModel = categoryConfig[category].model
+
+    if (!objectId) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Такого объекта нет!",
+      })}
+
+    if (userId) {
+      const user = await UserModel.findById(userId)
+      const { favouriteObject } = user
       let favouriteValue = true
 
       let update = {}
-      if ( favouriteUser.includes(user) ) {
+      if (favouriteObject.includes(objectId)) {
         favouriteValue = false
         update = {
-          $pull: { favouriteUser: user },
+          $pull: { favouriteObject: objectId },
         }
       } else {
         update = {
-          $addToSet: { favouriteUser: user },
+          $addToSet: { favouriteObject: objectId },
         }
       }
 
-      const object = await categoryModel.findByIdAndUpdate(objectId, update, {
+      await user.updateOne(update, {
         new: true,
       })
-
-      if (!object) {
-        return res.status(404).json({
-          status: "fail",
-          message: "Такого объекта нет!",
-        })
-      }
 
       res.status(200).json({
         status: "success",
         message: favouriteValue
           ? "Объект добавлен в избранное"
           : "Объект удален из избранного",
+        favouriteValue,
       })
     } else {
       // Для неавторизованного пользователя
@@ -423,13 +406,8 @@ export const getFavourites = async (req, res) => {
 
     if (userId) {
       // Логика для авторизованных пользователей
-      const objects = await Promise.all(
-        categoryModels.map((model) =>
-          model.find({ favouriteUser: userId }).select('_id')
-        )
-      )
-
-      favouriteIds = objects.flatMap(result => result.map(obj => obj._id));
+      const user = await UserModel.findById(userId)
+      favouriteIds = user.favouriteObject
     } else {
       // Логика для неавторизованных пользователей
       favouriteIds = req.cookies.favourites
@@ -454,8 +432,8 @@ export const getFavourites = async (req, res) => {
       .flat()
 
     if (favouriteObjects.length === 0) {
-      return res.status(404).json({
-        status: "fail",
+      return res.status(200).json({
+        status: "success",
         message: "Избранные объекты не найдены",
       })
     }
@@ -488,40 +466,22 @@ export const sendMessage = async (req, res) => {
         message: "Такого объекта нет!",
       })
     }
-    
-    const { email: ownerEmail, firstName } = await UserModel.findById(object.user) 
+
+    const { email: ownerEmail, firstName } = await UserModel.findById(
+      object.user
+    )
     const { name, phone, email, message } = req.body
 
-    // Создаем транспорт для отправки почты
-    const transporter = nodemailer.createTransport({
-      // Настройки для вашего почтового сервера
-      host: "smtp.mail.ru",
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.mail,
-        pass: process.env.mailPass,
-      },
-    })
-
-    // Опции для отправки письма
-    const mailOptions = {
-      from: `"NestHaven" <${process.env.mail}>`,
-      to: ownerEmail,
-      subject: "Сообщение от пользователя",
-      html: `
-      <div style="font-family: Arial, sans-serif; color: #333;">
-        <p style="font-size: 16px;">Здравствуйте, ${firstName}!<br>Вы получили сообщение от пользователя NestHaven:</p>
-        <p style="font-size: 18px;"><strong>${message}</strong></p>
-        <p style="font-size: 14px; color: #777;">${name} <br> ${phone} <br> ${email}</p>
-        <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;">
-        <p style="font-size: 12px; color: #777;">С уважением, <br> Команда NestHaven</p>
-      </div>
-    `,
-    }
-
-    // Отправляем письмо
-    await transporter.sendMail(mailOptions)
+    let mailMessage = `
+    <div style="font-family: Arial, sans-serif; color: #333;">
+      <p style="font-size: 16px;">Здравствуйте, ${firstName}!<br>Вы получили сообщение от пользователя NestHaven:</p>
+      <p style="font-size: 18px;"><strong>${message}</strong></p>
+      <p style="font-size: 14px; color: #777;">${name} <br> ${phone} <br> ${email}</p>
+      <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;">
+      <p style="font-size: 12px; color: #777;">С уважением, <br> Команда NestHaven</p>
+    </div>
+  `
+    sendMail(ownerEmail, "Сообщение от пользователя", mailMessage)
 
     // Отправляем успешный ответ
     res
@@ -534,4 +494,3 @@ export const sendMessage = async (req, res) => {
     })
   }
 }
-
