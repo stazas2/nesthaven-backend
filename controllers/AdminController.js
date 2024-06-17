@@ -1,9 +1,9 @@
-import { ArhiveModel, UserModel } from "../models/index.js"
+import { ArhiveModel } from "../models/index.js"
 import {
   categoryConfig,
   categoryModels,
   extractFields,
-} from "../utils/selectCategory.js"
+} from "../utils/index.js"
 
 export const createObject = async (req, res) => {
   try {

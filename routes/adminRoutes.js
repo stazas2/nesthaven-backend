@@ -24,5 +24,4 @@ router.get("/admin/archive", checkAuth.mandatory, AdminController.getArchiveObje
 router.get("/admin/archive/:id", checkAuth.mandatory, AdminController.getOneArchiveObject)
 router.delete("/admin/deleteArchive/:id", checkAuth.mandatory, AdminController.deleteArchiveObject)
 
-
 export default router

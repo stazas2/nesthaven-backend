@@ -1,5 +1,5 @@
 import express from "express"
-import { AdminController, UserController } from "../controllers/index.js"
+import { UserController } from "../controllers/index.js"
 import { checkAuth } from "../utils/index.js"
 
 const router = express.Router()
@@ -20,7 +20,5 @@ router.get(
   checkAuth.optional,
   UserController.getFavourites
 )
-
-router.get("/location", AdminController.getPropertyInfo)
 
 export default router

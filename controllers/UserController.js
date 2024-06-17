@@ -1,4 +1,4 @@
-import { categoryConfig, categoryModels } from "../utils/selectCategory.js"
+import { categoryConfig, categoryModels, sameFields } from "../utils/index.js"
 import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
 import { UserModel, OtpModel } from "../models/index.js"
@@ -187,16 +187,17 @@ export const getAllObjects = async (req, res) => {
       _limit = 15,
       _sort = "createdAt",
       _order = "desc",
-      location = "",
-      price = "",
-      category = "",
-      typeProperty = "",
-      typeTransaction = "",
+      category,
     } = req.query
 
     const query = Object.fromEntries(
-      Object.entries(req.query).filter(([key, value]) => !key.startsWith("_"))
+      Object.entries(req.query).filter(([key, value]) =>
+        !key.startsWith("_") && value !== "" && category
+          ? categoryConfig[category].fields.includes(key)
+          : sameFields.includes(key)
+      )
     )
+
     const skipObjects = (_page - 1) * _limit
     const objects = await Promise.all(
       categoryModels.map((model) => model.find(query))

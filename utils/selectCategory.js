@@ -5,7 +5,7 @@ import {
   PlotTypeModel,
 } from "../models/index.js"
 
-const sameFields = [
+export const sameFields = [
   "typeTransaction",
   "typeProperty",
   "category",
