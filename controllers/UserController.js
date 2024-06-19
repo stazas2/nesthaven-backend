@@ -228,7 +228,7 @@ export const getAllObjects = async (req, res) => {
       })
     }
 
-    const exludeUserFields = "-passwordHash -__v -createdAt -updatedAt"
+    const exludeUserFields = "-passwordHash -__v -createdAt -updatedAt -agree"
     const paginateObjectsWithUser = await Promise.all(
       paginateObjects.map(async (object) => {
         const user = await UserModel.findById(object.user).select(
@@ -273,7 +273,7 @@ export const getOneObject = async (req, res) => {
       })
     }
 
-    const exludeUserFields = "-passwordHash -__v -createdAt -updatedAt"
+    const exludeUserFields = "-passwordHash -__v -createdAt -updatedAt -agree"
     const user = await UserModel.findById(object.user).select(exludeUserFields)
 
     // Similar objects
@@ -287,9 +287,6 @@ export const getOneObject = async (req, res) => {
 
     const similarObjectsWithUser = await Promise.all(
       similarObjects.map(async (object) => {
-        const user = await UserModel.findById(object.user).select(
-          exludeUserFields
-        )
         return { ...object._doc, user }
       })
     )
@@ -433,9 +430,20 @@ export const getFavourites = async (req, res) => {
       categoryModels.map((model) => model.find({ _id: { $in: favouriteIds } }))
     )
 
-    const favouriteObjects = objects
+    let favouriteObjects = objects
       .filter((result) => result.length !== 0)
       .flat()
+
+      if (userId) {
+        const exludeUserFields = "-passwordHash -__v -createdAt -updatedAt -agree -favouriteObject"
+        const user = await UserModel.findById(userId).select(exludeUserFields)
+        favouriteObjects = await Promise.all(
+          favouriteObjects.map(async (object) => {
+            return { ...object._doc, user }
+          })
+        )
+      }
+    
 
     if (favouriteObjects.length === 0) {
       return res.status(200).json({
@@ -488,6 +496,34 @@ export const sendMessage = async (req, res) => {
     </div>
   `
     sendMail(ownerEmail, "Сообщение от пользователя", mailMessage)
+
+    // Отправляем успешный ответ
+    res
+      .status(200)
+      .json({ status: "success", message: "Письмо успешно отправлено" })
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({
+      status: "fail",
+    })
+  }
+}
+
+export const getHelp = async (req, res) => {
+  try {
+    const { name, phone, email, message } = req.body
+
+    let mailMessage = `
+    <div style="font-family: Arial, sans-serif; color: #333;">
+      <p style="font-size: 16px;">Сообщение в поддержку от «<span style="color: blue">${email}</span>»:</p>
+      <p style="font-size: 18px;"><strong>${message}</strong></p>
+      <p style="font-size: 14px; color: #777;">${name} <br> ${phone}</p>
+    </div>
+  `
+    //? Email поддержки
+    let mail = `cvetlana-malysheva@mail.ru`
+    
+    sendMail(mail, "Служба поддержки", mailMessage)
 
     // Отправляем успешный ответ
     res

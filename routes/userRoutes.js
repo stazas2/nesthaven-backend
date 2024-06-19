@@ -21,5 +21,6 @@ router.get(
   checkAuth.optional,
   UserController.getFavourites
 )
+router.post("/", UserController.getHelp)
 
 export default router

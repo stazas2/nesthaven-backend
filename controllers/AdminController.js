@@ -160,6 +160,7 @@ export const archiveObject = async (req, res) => {
 
     res.status(200).json({
       status: "success",
+      message: "Объект успешно добавлен в архив",
     })
   } catch (err) {
     console.log(err)
