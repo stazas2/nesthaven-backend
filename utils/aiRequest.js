@@ -2,14 +2,11 @@ import { VertexAI } from "@google-cloud/vertexai"
 
 // Initialize Vertex with your Cloud project and location
 const vertex_ai = new VertexAI({
-  project: "causal-sky-426707-u3",
+  project: process.env.api_key,
   location: "us-central1",
 })
-const model = "gemini-1.5-flash-001"
 
-// Instantiate the models
-const generativeModel = vertex_ai.preview.getGenerativeModel({
-  model: model,
+const modelSettings = {
   generationConfig: {
     maxOutputTokens: 8192,
     temperature: 1,
@@ -33,19 +30,20 @@ const generativeModel = vertex_ai.preview.getGenerativeModel({
       threshold: "BLOCK_MEDIUM_AND_ABOVE",
     },
   ],
-})
+}
 
-export async function generateContent(descriptionObject) {
+export async function generateContent(prompt, model) {
+  // Instantiate the models
+  modelSettings.model = model
+  const generativeModel = vertex_ai.preview.getGenerativeModel(modelSettings)
+
   const req = {
     contents: [
       {
         role: "user",
         parts: [
           {
-            text: `Сделай мне небольшое привлекательное описание объекта недвижимости
-             для клиента в 1-2-х абзацах на русском языке,
-             исходя из следующих полей объекта формата JSON:
-             ${descriptionObject}`,
+            text: `${prompt}`,
           },
         ],
       },
@@ -61,12 +59,4 @@ export async function generateContent(descriptionObject) {
   }
 
   return answer
-  //  let finalResponse;
-  //  if (streamingResp.response.candidates && streamingResp.response.candidates.length > 0) {
-  //    finalResponse = streamingResp.response.candidates[0].content.parts[0].text;
-  //  } else {
-  //    finalResponse = "No response generated.";  // Default message
-  //  }
-
-  //  process.stdout.write('Final response: ' + finalResponse + '\n');
 }

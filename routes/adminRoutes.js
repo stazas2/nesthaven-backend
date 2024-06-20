@@ -24,8 +24,6 @@ router
   .patch(categoryRules, handleValidationError, AdminController.updateObject)
   .delete(AdminController.deleteObject)
 
-
-  
 // todo
 //? Почему с /admin не работает?
 router.get("/location", AdminController.getPropertyInfo)

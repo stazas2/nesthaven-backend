@@ -182,6 +182,13 @@ export const getMe = async (req, res) => {
 
 export const getAllObjects = async (req, res) => {
   try {
+    // todo
+    //? Если value параметров больше одного, то как их обработать? catefory = apartment,house
+
+    // todo
+    //? Если выбраны все категории, то как обработать доп фильтры?  
+    //? category, plot:  floor=5  
+    
     const {
       _page = 1,
       _limit = 15,
