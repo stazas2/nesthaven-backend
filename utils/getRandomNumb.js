@@ -1,4 +1,4 @@
-const rand = function getRandomInt() {
+export default () => {
   let number = ""
   for (let i = 0; i < 5; i++) {
     let elem = Math.floor(Math.random() * 10)
@@ -6,5 +6,3 @@ const rand = function getRandomInt() {
   }
   return number
 }
-
-export default rand

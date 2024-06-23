@@ -19,7 +19,7 @@ export const sameFields = [
   "messengers",
 ]
 export const categoryConfig = {
-  apartment: {
+  "квартира": {
     model: ApartamentTypeModel,
     fields: [
       ...sameFields,
@@ -38,7 +38,7 @@ export const categoryConfig = {
       "entrance",
     ],
   },
-  house: {
+  "дом": {
     model: HouseTypeModel,
     fields: [
       ...sameFields,
@@ -56,11 +56,11 @@ export const categoryConfig = {
       "additionally",
     ],
   },
-  garage: {
+  "гараж": {
     model: GarageTypeModel,
     fields: [...sameFields, "generalArea", "waterSupply", "electricity"],
   },
-  plot: {
+  "участок": {
     model: PlotTypeModel,
     fields: [
       ...sameFields,

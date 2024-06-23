@@ -2,7 +2,7 @@ import { categoryConfig, categoryModels, sameFields } from "../utils/index.js"
 import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
 import { UserModel, OtpModel } from "../models/index.js"
-import { rand, sendMail } from "../utils/index.js"
+import { getRandomInt, sendMail } from "../utils/index.js"
 
 export const register = async (req, res) => {
   try {
@@ -105,7 +105,7 @@ export const forgotPass = async (req, res) => {
     }
 
     const { email } = req.body
-    const code = rand() // Генерация случайного кода
+    const code = getRandomInt() // Генерация случайного кода
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000) // Время истечения
 
     // Сохранение кода в базе данных
@@ -184,10 +184,6 @@ export const getAllObjects = async (req, res) => {
   try {
     // todo
     //? Если value параметров больше одного, то как их обработать? catefory = apartment,house
-
-    // todo
-    //? Если выбраны все категории, то как обработать доп фильтры?  
-    //? category, plot:  floor=5  
     
     const {
       _page = 1,
@@ -196,6 +192,10 @@ export const getAllObjects = async (req, res) => {
       _order = "desc",
       category,
     } = req.query
+
+    // todo
+    //? декодировать русс символы
+    // decodeURIComponent('%7B"from"%3A100%2C"to"%3A1000%7D')
 
     const query = Object.fromEntries(
       Object.entries(req.query).filter(([key, value]) =>

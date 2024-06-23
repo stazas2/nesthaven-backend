@@ -6,7 +6,7 @@ let description = "",
   response = "",
   model = ""
 
-const extraModel = async (req, res) => {
+const runExtraRequest = async (req, res) => {
    try {
       model = geminiModels[1]
       response = await generateContent(prompt, model)
@@ -32,6 +32,6 @@ export const runRequest = async (req, res) => {
     response = await generateContent(prompt, model)
     res.status(200).json({ status: "success", response })
   } catch (err) {
-    await extraModel(req, res)
+    await runExtraRequest(req, res)
   }
 }

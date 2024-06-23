@@ -109,7 +109,7 @@ export const deleteObject = async (req, res) => {
 
 export const updateObject = async (req, res) => {
   try {
-    const objectId = req.params.id
+    const objectId = req.body._id
     const category = req.body.category
 
     const categoryModel = categoryConfig[category].model

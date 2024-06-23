@@ -24,8 +24,6 @@ router
   .patch(categoryRules, handleValidationError, AdminController.updateObject)
   .delete(AdminController.deleteObject)
 
-// todo
-//? Почему с /admin не работает?
 router.get("/location", AdminController.getPropertyInfo)
 
 router.post("/addArchive", AdminController.archiveObject)
@@ -34,6 +32,6 @@ router.get("/archive", checkAuth.mandatory, AdminController.getArchiveObjects)
 router
   .route("/archive/:id")
   .get(checkAuth.mandatory, AdminController.getOneArchiveObject)
-  .delete(checkAuth.mandatory, AdminController.deleteArchiveObject)
+  .delete(AdminController.deleteArchiveObject)
 
 export default router
