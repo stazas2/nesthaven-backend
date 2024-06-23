@@ -2,7 +2,7 @@ import { categoryConfig, categoryModels, sameFields } from "../utils/index.js"
 import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
 import { UserModel, OtpModel } from "../models/index.js"
-import { getRandomInt, sendMail } from "../utils/index.js"
+import { getRandomInt, sendMail, detailedLocation } from "../utils/index.js"
 
 export const register = async (req, res) => {
   try {
@@ -190,25 +190,49 @@ export const getAllObjects = async (req, res) => {
       category,
     } = req.query
 
-    // todo
-    // console.log(req.query)
+    const query = req.query;
 
-    //? декодировать русс символы
-    // decodeURIComponent('%7B"from"%3A100%2C"to"%3A1000%7D')
 
-    // const state = location ? location.includes
+    //todo
+    //? отдельная логика
+    
+    if (query.location) {
+      query.location = { $regex: query.location };
+    }
 
-    const query = Object.fromEntries(
-      Object.entries(req.query).filter(([key, value]) =>
-        !key.startsWith("_") && value !== "" && category
-          ? categoryConfig[category].fields.includes(key)
-          : sameFields.includes(key)
-      )
-    )
+    if (query.priceFrom && query.priceTo) {
+      query.price = { $gte: +query.priceFrom, $lte: +query.priceTo };
+      delete query.priceFrom;
+      delete query.priceTo;
+    } else if (query.priceFrom) {
+      query.price = { $gte: +query.priceFrom };
+      delete query.priceFrom;
+    } else if (query.priceTo) {
+      query.price = { $lte: +query.priceTo };
+      delete query.priceTo;
+    }
+    
+    // Фильтрация полей на основе категории и конфигурации
+    const filteredQuery = Object.fromEntries(
+      Object.entries(query).filter(([key, value]) => {
+        // Игнорируем поля, начинающиеся с "_", и пустые значения
+        if (key.startsWith("_") || value === "") {
+          return false;
+        }
+    
+        // Фильтрация по категории
+        if (category) {
+          return categoryConfig[category].fields.includes(key);
+        }
+    
+        // Общая фильтрация для всех категорий
+        return sameFields.includes(key);
+      })
+    );
 
     const skipObjects = (_page - 1) * _limit
     const objects = await Promise.all(
-      categoryModels.map((model) => model.find(query))
+      categoryModels.map((model) => model.find(filteredQuery))
     )
     const filteredObjects = objects
       .filter((result) => result.length !== 0)
@@ -248,7 +272,7 @@ export const getAllObjects = async (req, res) => {
 
     res.status(200).json({
       status: "success",
-      filter: query,
+      filter: filteredQuery,
       page: _page,
       limit: _limit,
       amountPages: pages,
@@ -442,16 +466,16 @@ export const getFavourites = async (req, res) => {
       .filter((result) => result.length !== 0)
       .flat()
 
-      if (userId) {
-        const exludeUserFields = "-passwordHash -__v -createdAt -updatedAt -agree -favouriteObject"
-        const user = await UserModel.findById(userId).select(exludeUserFields)
-        favouriteObjects = await Promise.all(
-          favouriteObjects.map(async (object) => {
-            return { ...object._doc, user }
-          })
-        )
-      }
-    
+    if (userId) {
+      const exludeUserFields =
+        "-passwordHash -__v -createdAt -updatedAt -agree -favouriteObject"
+      const user = await UserModel.findById(userId).select(exludeUserFields)
+      favouriteObjects = await Promise.all(
+        favouriteObjects.map(async (object) => {
+          return { ...object._doc, user }
+        })
+      )
+    }
 
     if (favouriteObjects.length === 0) {
       return res.status(200).json({
@@ -530,7 +554,7 @@ export const getHelp = async (req, res) => {
   `
     //? Email поддержки
     let mail = `cvetlana-malysheva@mail.ru`
-    
+
     sendMail(mail, "Служба поддержки", mailMessage)
 
     // Отправляем успешный ответ

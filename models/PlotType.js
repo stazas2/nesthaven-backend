@@ -40,7 +40,7 @@ const PlotTypeSchema = new mongoose.Schema(
       default: "",
     },
     price: {
-      type: String,
+      type: Number,
       required: true,
     },
     phone: {

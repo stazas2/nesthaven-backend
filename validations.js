@@ -37,7 +37,7 @@ const categoryValidation = [
   body("plans", "plans должет быть массивом").optional().isArray(),
   body("heading").isString(),
   body("description").optional().isString(),
-  body("price").isString(),
+  body("price").isNumeric(),
   body("phone").isString(),
   body("messengers", "messengers должет быть массивом").optional().isArray(),
 ]

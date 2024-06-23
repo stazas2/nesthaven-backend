@@ -4,6 +4,7 @@ import {
   categoryModels,
   extractFields,
 } from "../utils/index.js"
+import { detailedLocation } from "../utils/index.js"
 
 export const createObject = async (req, res) => {
   try {
@@ -109,7 +110,7 @@ export const deleteObject = async (req, res) => {
 
 export const updateObject = async (req, res) => {
   try {
-    const objectId = req.body._id
+    const objectId = req.params.id
     const category = req.body.category
 
     const categoryModel = categoryConfig[category].model
@@ -247,35 +248,11 @@ export const deleteArchiveObject = async (req, res) => {
 
 export const getPropertyInfo = async (req, res) => {
   try {
-    const detailedLocation = {
-      "Бендеры": ["Центр", "Ленинский", "Солнечный", "Борисовка"],
-      "Тирасполь": ["Центр", "Западный", "Мечникова", "Бородинка", "Южный"],
-      "Григориопольский р-н": ["Глиное", "Маяк", "Спея"],
-      "Дубоссарский р-н": ["Дубоссары", "Кошница", "Ливада", "Новосадовый"],
-      "Каменский р-н": [
-        "Каменка",
-        "Быковцы",
-        "Забродня",
-        "Комаровка",
-        "Коротнево",
-        "Красногорье",
-      ],
-      "Рыбницкий р-н": [
-        "Рыбница",
-        "Бессarabovca",
-        "Бucovățul Nou",
-        "Cuzmir",
-        "Glinjenica",
-      ],
-      "Слободзейский р-н": ["Слободзея", "Larga", "Molodiya", "Novosadovca"],
-    }
-
-    const obj = {...detailedLocation}
-    console.log(obj)
+    const location = {...detailedLocation}
 
     res.status(200).json({
       status: "success",
-      location: detailedLocation,
+      location,
     })
   } catch (err) {
     console.log(err)

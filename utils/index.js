@@ -1,5 +1,5 @@
 export { default as handleValidationError } from "./handleValidationError.js"
-export { default as getRandomInt } from "./getRandomNumb.js"
+export { getRandomInt, detailedLocation } from "./otherVars.js"
 export { default as sendMail } from "./sendMail.js"
 export { checkAuth } from "./checkAuth.js"
 export { categoryRules } from "./categoryValidation.js"
