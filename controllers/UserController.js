@@ -182,9 +182,6 @@ export const getMe = async (req, res) => {
 
 export const getAllObjects = async (req, res) => {
   try {
-    // todo
-    //? Если value параметров больше одного, то как их обработать? catefory = apartment,house
-    
     const {
       _page = 1,
       _limit = 15,
@@ -194,8 +191,12 @@ export const getAllObjects = async (req, res) => {
     } = req.query
 
     // todo
+    // console.log(req.query)
+
     //? декодировать русс символы
     // decodeURIComponent('%7B"from"%3A100%2C"to"%3A1000%7D')
+
+    // const state = location ? location.includes
 
     const query = Object.fromEntries(
       Object.entries(req.query).filter(([key, value]) =>

@@ -270,6 +270,9 @@ export const getPropertyInfo = async (req, res) => {
       "Слободзейский р-н": ["Слободзея", "Larga", "Molodiya", "Novosadovca"],
     }
 
+    const obj = {...detailedLocation}
+    console.log(obj)
+
     res.status(200).json({
       status: "success",
       location: detailedLocation,
