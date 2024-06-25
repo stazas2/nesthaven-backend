@@ -179,7 +179,7 @@ export const getArchiveObjects = async (req, res) => {
     if (archiveObjects.length === 0) {
       return res.status(200).json({
         status: "success",
-        archiveObjects,
+        objects: archiveObjects,
       })
     }
 

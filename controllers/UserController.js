@@ -294,15 +294,15 @@ export const getAllObjects = async (req, res) => {
       })
     )
 
-    // let response = {}
+    let response = {}
 
-    // if (!rangeValidation[0]) {
-    //   response.message = "Невалидный диапазон для поля: " + rangeValidation[1]
-    // }
+    if (!rangeValidation[0]) {
+      response.message = "Невалидный диапазон для поля: " + rangeValidation[1]
+    }
 
-    const response = {
+    response = {
       status: "success",
-      // ...response,
+      ...response,
       filter: filteredQuery,
       page: _page,
       limit: _limit,
