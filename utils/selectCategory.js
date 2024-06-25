@@ -28,7 +28,6 @@ export const categoryConfig = {
       "livingArea",
       "floor",
       "floorHouse",
-      "number",
       "numberRooms",
       "balconies",
       "bathroom",

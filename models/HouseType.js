@@ -60,11 +60,11 @@ const HouseTypeSchema = new mongoose.Schema(
       required: true,
     },
     generalArea: {
-      type: String,
+      type: Number,
       required: true,
     },
     livingArea: {
-      type: String,
+      type: Number,
       required: true,
     },
     numberFloor: {

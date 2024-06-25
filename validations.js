@@ -49,7 +49,6 @@ export const apartamentTypeValidation = [
   body("livingArea", "Превышен предел m2").isString().isLength({ max: 4 }),
   body("floor").isString(),
   body("floorHouse").isString(),
-  body("number").isString(),
   body("numberRooms", "Превышен предел кол-ва комнат")
     .isString()
     .isLength({ max: 2 }),

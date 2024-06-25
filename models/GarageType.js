@@ -52,7 +52,7 @@ const GarageTypeSchema = new mongoose.Schema(
       default: [],
     },
     generalArea: {
-      type: String,
+      type: Number,
       required: true,
     },
     waterSupply: {

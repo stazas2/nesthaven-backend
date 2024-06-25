@@ -26,12 +26,11 @@ router
 
 router.get("/location", AdminController.getPropertyInfo)
 
-router.post("/addArchive", AdminController.archiveObject)
 router.get("/archive", checkAuth.mandatory, AdminController.getArchiveObjects)
-
 router
   .route("/archive/:id")
   .get(checkAuth.mandatory, AdminController.getOneArchiveObject)
   .delete(AdminController.deleteArchiveObject)
+  .post(AdminController.archiveObject)
 
 export default router

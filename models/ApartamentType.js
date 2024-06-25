@@ -56,11 +56,11 @@ const ApartamentTypeSchema = new mongoose.Schema(
       required: true,
     },
     generalArea: {
-      type: String,
+      type: Number,
       required: true,
     },
     livingArea: {
-      type: String,
+      type: Number,
       required: true,
     },
     floor: {
@@ -68,10 +68,6 @@ const ApartamentTypeSchema = new mongoose.Schema(
       required: true,
     },
     floorHouse: {
-      type: String,
-      required: true,
-    },
-    number: {
       type: String,
       required: true,
     },

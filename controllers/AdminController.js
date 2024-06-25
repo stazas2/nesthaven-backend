@@ -142,7 +142,8 @@ export const updateObject = async (req, res) => {
 //////////////////////////////* АРХИВ
 export const archiveObject = async (req, res) => {
   try {
-    const { _id: objectId, category } = req.body
+    const objectId = req.params.id
+    const category = req.body.category
     const categoryModel = categoryConfig[category].model
 
     const object = await categoryModel.findById(objectId)
@@ -178,7 +179,7 @@ export const getArchiveObjects = async (req, res) => {
     if (archiveObjects.length === 0) {
       return res.status(200).json({
         status: "success",
-        message: "Архив пуст",
+        archiveObjects,
       })
     }
 

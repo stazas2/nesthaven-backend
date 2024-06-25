@@ -1,8 +1,15 @@
-import { categoryConfig, categoryModels, sameFields } from "../utils/index.js"
+import {
+  categoryConfig,
+  categoryModels,
+  deleteFieldOr,
+  sameFields,
+  getRandomInt,
+  sendMail,
+  rangeField,
+} from "../utils/index.js"
 import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
 import { UserModel, OtpModel } from "../models/index.js"
-import { getRandomInt, sendMail, detailedLocation } from "../utils/index.js"
 
 export const register = async (req, res) => {
   try {
@@ -190,45 +197,61 @@ export const getAllObjects = async (req, res) => {
       category,
     } = req.query
 
-    const query = req.query;
+    let query = req.query
+    let modelFields = ""
 
-
-    //todo
-    //? отдельная логика
-    
     if (query.location) {
-      query.location = { $regex: query.location };
+      if (Array.isArray(query.location)) {
+        query = {
+          ...query,
+          $or: query.location.map((loc) => ({
+            location: { $regex: loc },
+          })),
+        }
+        delete query.location
+      } else {
+        query.location = {
+          $regex: query.location,
+        }
+      }
     }
 
-    if (query.priceFrom && query.priceTo) {
-      query.price = { $gte: +query.priceFrom, $lte: +query.priceTo };
-      delete query.priceFrom;
-      delete query.priceTo;
-    } else if (query.priceFrom) {
-      query.price = { $gte: +query.priceFrom };
-      delete query.priceFrom;
-    } else if (query.priceTo) {
-      query.price = { $lte: +query.priceTo };
-      delete query.priceTo;
-    }
-    
+    rangeField(query, ["generalArea", "livingArea", "price"])
+    // rangeField(query, "livingArea")
+    // rangeField(query, "price")
+
+
     // Фильтрация полей на основе категории и конфигурации
     const filteredQuery = Object.fromEntries(
       Object.entries(query).filter(([key, value]) => {
         // Игнорируем поля, начинающиеся с "_", и пустые значения
         if (key.startsWith("_") || value === "") {
-          return false;
+          return false
         }
-    
+
+        //todo
+        //? В отдельную логику (pushFieldOr)
         // Фильтрация по категории
         if (category) {
-          return categoryConfig[category].fields.includes(key);
+          modelFields = categoryConfig[category].fields
+          if (key === "$or") {
+            modelFields.push("$or")
+          }
+          return modelFields.includes(key)
+        } else {
+          if (key === "$or") {
+            sameFields.push("$or")
+          }
+          return sameFields.includes(key)
         }
-    
-        // Общая фильтрация для всех категорий
-        return sameFields.includes(key);
       })
-    );
+    )
+
+    if (category) {
+      deleteFieldOr(modelFields)
+    } else {
+      deleteFieldOr(sameFields)
+    }
 
     const skipObjects = (_page - 1) * _limit
     const objects = await Promise.all(
