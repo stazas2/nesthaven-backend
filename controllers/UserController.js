@@ -294,7 +294,6 @@ export const getAllObjects = async (req, res) => {
       })
     )
 
-    //?
     // let response = {}
 
     // if (!rangeValidation[0]) {
