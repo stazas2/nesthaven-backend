@@ -219,10 +219,9 @@ export const getOneArchiveObject = async (req, res) => {
 //Удалить объект с архива
 export const deleteArchiveObject = async (req, res) => {
   try {
-    const objectId = req.params.id
-    const user = req.userId
+    const objectId = req.body._id
 
-    const object = await ArhiveModel.find({ _id: objectId, user })
+    const object = await ArhiveModel.findById({objectId})
     if (!object) {
       return res.status(404).json({
         status: "fail",
@@ -230,7 +229,7 @@ export const deleteArchiveObject = async (req, res) => {
       })
     }
     
-
+  console.log(object)
     const { category } = object[0]
     const categoryModel = categoryConfig[category].model
 

@@ -216,7 +216,11 @@ export const getAllObjects = async (req, res) => {
       }
     }
 
-    rangeField(query, ["generalArea", "livingArea", "price"])
+    let rangeValidation = rangeField(query, [
+      "generalArea",
+      "livingArea",
+      "price",
+    ])
 
     // Фильтрация полей на основе категории и конфигурации
     const filteredQuery = Object.fromEntries(
@@ -290,9 +294,16 @@ export const getAllObjects = async (req, res) => {
       })
     )
 
+    //?
+    // let response = {}
 
-    res.status(200).json({
+    // if (!rangeValidation[0]) {
+    //   response.message = "Невалидный диапазон для поля: " + rangeValidation[1]
+    // }
+
+    const response = {
       status: "success",
+      // ...response,
       filter: filteredQuery,
       page: _page,
       limit: _limit,
@@ -300,7 +311,9 @@ export const getAllObjects = async (req, res) => {
       sort: _sort,
       order: _order,
       objects: paginateObjectsWithUser,
-    })
+    }
+
+    res.status(200).json(response)
   } catch (err) {
     console.log(err)
     res.status(500).json({
