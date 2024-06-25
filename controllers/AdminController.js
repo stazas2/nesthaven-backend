@@ -185,7 +185,7 @@ export const getArchiveObjects = async (req, res) => {
 
     res.status(200).json({
       status: "success",
-      archiveObjects,
+      objects: archiveObjects,
     })
   } catch (err) {
     console.log(err)

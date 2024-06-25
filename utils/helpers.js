@@ -7,35 +7,60 @@ export const getRandomInt = () => {
   return number
 }
 
+// export const rangeField = (query, [field]) => {
+//   if (!(query[field + "From"] || query[field + "To"])) return
 
-//todo
-//? доделать
+//   const fieldFrom = query[field + "From"]
+//   const fieldTo = query[field + "To"]
+
+//   if (fieldFrom && fieldTo) {
+//     query[field] = { $gte: +fieldFrom, $lte: +fieldTo }
+//     delete query[field + "From"]
+//     delete query[field + "To"]
+//   } else if (fieldFrom) {
+//     query[field] = { $gte: +fieldFrom }
+//     delete query[field + "From"]
+//   } else if (fieldTo) {
+//     query[field] = { $lte: +fieldTo }
+//     delete query[field + "To"]
+//   }
+// }
+
 export const rangeField = (query, field) => {
+  // let validation = true, errorField = ''
+
+  //? Для гибкого использования используем массив значений
   for (let i = 0; i < field.length; i++) {
     if (!(query[field[i] + "From"] || query[field[i] + "To"])) continue
 
-    const fieldFrom = query[field[i] + "From"]
-    const fieldTo = query[field[i] + "To"]
-  
-    console.log(fieldFrom, fieldTo)
+    let fieldFrom = query[field[i] + "From"]
+    let fieldTo = query[field[i] + "To"]
+
+    //? приравнивать в случае невалиданости
+    //? отправлять сообщение, что не валидно на клиент
 
     if (fieldFrom && fieldTo) {
-      query[field] = { $gte: +fieldFrom, $lte: +fieldTo }
+      if (fieldFrom > fieldTo) {
+        validation = false
+        errorField = field[i]
+        fieldFrom = fieldTo
+      }
+
+      query[field[i]] = { $gte: +fieldFrom, $lte: +fieldTo }
       delete query[field[i] + "From"]
       delete query[field[i] + "To"]
     } else if (fieldFrom) {
-      query[field] = { $gte: +fieldFrom }
+      query[field[i]] = { $gte: +fieldFrom }
       delete query[field[i] + "From"]
     } else if (fieldTo) {
-      query[field] = { $lte: +fieldTo }
+      query[field[i]] = { $lte: +fieldTo }
       delete query[field[i] + "To"]
     }
   }
 
-
+  //? Возвращаем строку для проверки
+  // return validation, errorField
 }
-
-
 
 // export const pushFieldOr = (fields, key, addOr) => {
 //   if (addOr && key === "$or") {
@@ -43,7 +68,6 @@ export const rangeField = (query, field) => {
 //   }
 //   return fields.includes(key);
 // }
-
 
 export const deleteFieldOr = (fields) => {
   for (let i = fields.length - 1; i !== 0; i--) {

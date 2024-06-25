@@ -217,9 +217,6 @@ export const getAllObjects = async (req, res) => {
     }
 
     rangeField(query, ["generalArea", "livingArea", "price"])
-    // rangeField(query, "livingArea")
-    // rangeField(query, "price")
-
 
     // Фильтрация полей на основе категории и конфигурации
     const filteredQuery = Object.fromEntries(
@@ -292,6 +289,7 @@ export const getAllObjects = async (req, res) => {
         return { ...object._doc, user }
       })
     )
+
 
     res.status(200).json({
       status: "success",
