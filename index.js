@@ -13,7 +13,7 @@ import {
 
 dotenv.config()
 const app = express()
-const PORT = process.env.PORT || 4000
+const PORT = process.env.PORT || 1337
 const mongoUri = process.env.MONGODB_URI
 
 mongoose
