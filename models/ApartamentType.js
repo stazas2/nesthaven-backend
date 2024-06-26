@@ -99,6 +99,10 @@ const ApartamentTypeSchema = new mongoose.Schema(
       type: [String],
       required: true,
     },
+    viewsCount: {
+      type: Number,
+      default: 0,
+   },
   },
   {
     timestamps: true,

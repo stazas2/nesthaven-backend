@@ -36,11 +36,10 @@ export const rangeField = (query, field) => {
     let fieldFrom = query[field[i] + "From"]
     let fieldTo = query[field[i] + "To"]
 
-    //? приравнивать в случае невалиданости
-    //? отправлять сообщение, что не валидно на клиент
-
+    
     if (fieldFrom && fieldTo) {
       if (fieldFrom > fieldTo) {
+        //? приравнивание в случае невалидации
         validation.splice(0, 1, false, field[i])
         fieldFrom = fieldTo
       }

@@ -257,6 +257,7 @@ export const getAllObjects = async (req, res) => {
     const objects = await Promise.all(
       categoryModels.map((model) => model.find(filteredQuery))
     )
+
     const sortedObjects = objects
       .filter((result) => result.length !== 0)
       .flat()
@@ -283,6 +284,8 @@ export const getAllObjects = async (req, res) => {
     }
 
     const exludeUserFields = "-passwordHash -__v -createdAt -updatedAt -agree"
+    //todo
+    //? использоваться .populate('user')
     const paginateObjectsWithUser = await Promise.all(
       paginateObjects.map(async (object) => {
         const user = await UserModel.findById(object.user).select(
@@ -325,7 +328,7 @@ export const getOneObject = async (req, res) => {
     let object = null
 
     for (let model of categoryModels) {
-      object = await model.findById(objectId)
+      object = await model.findByIdAndUpdate(objectId, { $inc: { viewsCount: 1 } })
       if (object) break
     }
 
@@ -592,6 +595,40 @@ export const getHelp = async (req, res) => {
     res
       .status(200)
       .json({ status: "success", message: "Письмо успешно отправлено" })
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({
+      status: "fail",
+    })
+  }
+}
+
+export const getPopularObjects = async (req, res) => {
+  try {
+    const objects = await Promise.all(
+      categoryModels.map((model) =>
+        model.find().sort({ viewsCount: -1 })
+      )
+    )
+
+    const popularObjects = objects
+    //.filter((object) => object.viewsCount >= 2)
+      .filter((result) => result.length !== 0)
+      .flat()
+      .filter((object) => object.viewsCount >= 2)
+      .slice(0, 5)
+
+    if (popularObjects.length === 0) {
+      return res.status(200).json({
+        status: "success",
+        objects: popularObjects,
+      })
+    }
+
+    res.status(200).json({
+      status: "success",
+      objects: popularObjects,
+    })
   } catch (err) {
     console.log(err)
     res.status(500).json({

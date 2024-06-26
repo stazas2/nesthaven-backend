@@ -17,6 +17,7 @@ export const sameFields = [
   "price",
   "phone",
   "messengers",
+  "viewsCount",
 ]
 export const categoryConfig = {
   "Квартира": {

@@ -21,6 +21,7 @@ router.get(
   checkAuth.optional,
   UserController.getFavourites
 )
-router.post("/", UserController.getHelp)
+router.post("/contacts", UserController.getHelp)
+router.get("/", UserController.getPopularObjects)
 
 export default router
