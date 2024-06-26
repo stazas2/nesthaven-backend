@@ -66,7 +66,7 @@ export const houseTypeValidation = [
   body("numberRooms").isString().isLength({ max: 2 }),
   body("generalArea", "Превышен предел m2").isString().isLength({ max: 5 }),
   body("livingArea", "Превышен предел m2").isString().isLength({ max: 5 }),
-  body("numberFloor").isString(),
+  body("floorHouse").isString(),
   body("bathroom").isString(),
   body("sewerage").isString(),
   body("waterSupply").isString(),

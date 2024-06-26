@@ -67,7 +67,7 @@ const HouseTypeSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    numberFloor: {
+    floorHouse: {
       type: String,
       required: true,
     },

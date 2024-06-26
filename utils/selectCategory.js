@@ -45,7 +45,7 @@ export const categoryConfig = {
       "typeStructure",
       "generalArea",
       "livingArea",
-      "numberFloor",
+      "floorHouse",
       "numberRooms",
       "sewerage",
       "bathroom",
