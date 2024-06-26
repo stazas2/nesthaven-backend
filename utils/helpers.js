@@ -27,7 +27,7 @@ export const getRandomInt = () => {
 // }
 
 export const rangeField = (query, field) => {
-  let validation = []
+  let validation = [true]
 
   //? Для гибкого использования используем массив значений
   for (let i = 0; i < field.length; i++) {
@@ -41,7 +41,7 @@ export const rangeField = (query, field) => {
 
     if (fieldFrom && fieldTo) {
       if (fieldFrom > fieldTo) {
-        validation.push(false, field[i])
+        validation.splice(0, 1, false, field[i])
         fieldFrom = fieldTo
       }
 
@@ -58,7 +58,7 @@ export const rangeField = (query, field) => {
   }
 
   //? Возвращаем строку для проверки
-  return validation
+  if (validation.length > 0) return validation
 }
 
 // export const pushFieldOr = (fields, key, addOr) => {

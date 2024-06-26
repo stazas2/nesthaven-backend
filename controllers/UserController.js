@@ -254,24 +254,22 @@ export const getAllObjects = async (req, res) => {
       deleteFieldOr(sameFields)
     }
 
-    const skipObjects = (_page - 1) * _limit
     const objects = await Promise.all(
       categoryModels.map((model) => model.find(filteredQuery))
     )
-    const filteredObjects = objects
+    const sortedObjects = objects
       .filter((result) => result.length !== 0)
       .flat()
+      .sort((a, b) => {
+        if (_order === "asc") {
+          return a[_sort] - b[_sort]
+        } else if (_order === "desc") {
+          return b[_sort] - a[_sort]
+        }
+      })
 
-    const pages = Math.ceil(filteredObjects.length / _limit)
-
-    const sortedObjects = filteredObjects.sort((a, b) => {
-      if (_order === "asc") {
-        return a[_sort] - b[_sort]
-      } else if (_order === "desc") {
-        return b[_sort] - a[_sort]
-      }
-    })
-
+    const pages = Math.ceil(sortedObjects.length / _limit)
+    const skipObjects = (_page - 1) * _limit
     const paginateObjects = sortedObjects.slice(
       skipObjects,
       skipObjects + +_limit
@@ -294,8 +292,8 @@ export const getAllObjects = async (req, res) => {
       })
     )
 
+    //? Добавление логики в случае неверного диапазона
     let response = {}
-
     if (!rangeValidation[0]) {
       response.message = "Невалидный диапазон для поля: " + rangeValidation[1]
     }
