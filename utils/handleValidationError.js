@@ -1,10 +1,12 @@
-import { validationResult } from "express-validator"
+import { validationResult } from "express-validator";
 
 export default (req, res, next) => {
-  const error = validationResult(req)
-  if (!error.isEmpty()) {
-    return res.status(400).json(error.array())
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      message: "Ошибка валидации",
+      errors: errors.array(),
+    });
   }
-
-  next()
+  next();
 }

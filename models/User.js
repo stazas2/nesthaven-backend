@@ -19,6 +19,9 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    // avatar: {
+    //   type: String,
+    // },
     favouriteObject:{
       type: [String],
       default: [],

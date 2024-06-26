@@ -40,7 +40,7 @@ const GarageTypeSchema = new mongoose.Schema(
       default: "",
     },
     price: {
-      type: String,
+      type: Number,
       required: true,
     },
     phone: {
@@ -52,7 +52,7 @@ const GarageTypeSchema = new mongoose.Schema(
       default: [],
     },
     generalArea: {
-      type: String,
+      type: Number,
       required: true,
     },
     waterSupply: {
@@ -63,6 +63,10 @@ const GarageTypeSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    viewsCount: {
+      type: Number,
+      default: 0,
+   },
   },
   {
     timestamps: true,

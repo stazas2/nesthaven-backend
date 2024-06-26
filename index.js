@@ -8,6 +8,7 @@ import {
   userRoutes,
   authRoutes,
   storageRoute,
+  aiRoute,
 } from "./routes/index.js"
 
 dotenv.config()
@@ -29,6 +30,7 @@ app.use("/", userRoutes)
 app.use("/", authRoutes)
 app.use("/", adminRoutes)
 app.use("/", storageRoute)
+app.use("/", aiRoute)
 
 // Запуск
 app.listen(PORT, (error) => {

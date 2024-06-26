@@ -1,3 +1,4 @@
+//
 import express from "express"
 import { UserController } from "../controllers/index.js"
 import { checkAuth } from "../utils/index.js"
@@ -20,5 +21,7 @@ router.get(
   checkAuth.optional,
   UserController.getFavourites
 )
+router.post("/contacts", UserController.getHelp)
+router.get("/", UserController.getPopularObjects)
 
 export default router

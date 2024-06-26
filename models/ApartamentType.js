@@ -40,7 +40,7 @@ const ApartamentTypeSchema = new mongoose.Schema(
       default: "",
     },
     price: {
-      type: String,
+      type: Number,
       required: true,
     },
     phone: {
@@ -56,11 +56,11 @@ const ApartamentTypeSchema = new mongoose.Schema(
       required: true,
     },
     generalArea: {
-      type: String,
+      type: Number,
       required: true,
     },
     livingArea: {
-      type: String,
+      type: Number,
       required: true,
     },
     floor: {
@@ -68,10 +68,6 @@ const ApartamentTypeSchema = new mongoose.Schema(
       required: true,
     },
     floorHouse: {
-      type: String,
-      required: true,
-    },
-    number: {
       type: String,
       required: true,
     },
@@ -103,6 +99,10 @@ const ApartamentTypeSchema = new mongoose.Schema(
       type: [String],
       required: true,
     },
+    viewsCount: {
+      type: Number,
+      default: 0,
+   },
   },
   {
     timestamps: true,

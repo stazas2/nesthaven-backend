@@ -40,7 +40,7 @@ const PlotTypeSchema = new mongoose.Schema(
       default: "",
     },
     price: {
-      type: String,
+      type: Number,
       required: true,
     },
     phone: {
@@ -52,7 +52,7 @@ const PlotTypeSchema = new mongoose.Schema(
       default: [],
     },
     generalArea: {
-      type: String,
+      type: Number,
       required: true,
     },
     waterSupply: {
@@ -71,6 +71,10 @@ const PlotTypeSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    viewsCount: {
+      type: Number,
+      default: 0,
+   },
   },
   {
     timestamps: true,

@@ -8,20 +8,29 @@ import { AdminController } from "../controllers/index.js"
 
 const router = express.Router()
 
-router.route("/admin")
+router
+  .route("/admin")
   .get(checkAuth.mandatory, AdminController.getAllUserObjects)
-  .post(checkAuth.mandatory, categoryRules, handleValidationError, AdminController.createObject)
-  
-router.route("/admin/:id")
+  .post(
+    checkAuth.mandatory,
+    categoryRules,
+    handleValidationError,
+    AdminController.createObject
+  )
+
+router
+  .route("/admin/:id")
   .get(checkAuth.mandatory, AdminController.getOneObject)
   .patch(categoryRules, handleValidationError, AdminController.updateObject)
-  .delete(AdminController.deleteObject);
-  
-router.get("/admin/location", AdminController.getPropertyInfo)
+  .delete(AdminController.deleteObject)
 
-router.post("/admin/addArchive", AdminController.archiveObject)
-router.get("/admin/archive", checkAuth.mandatory, AdminController.getArchiveObjects)
-router.get("/admin/archive/:id", checkAuth.mandatory, AdminController.getOneArchiveObject)
-router.delete("/admin/deleteArchive/:id", checkAuth.mandatory, AdminController.deleteArchiveObject)
+router.get("/location", AdminController.getPropertyInfo)
+
+router.get("/archive", checkAuth.mandatory, AdminController.getArchiveObjects)
+router
+  .route("/archive/:id")
+  .get(checkAuth.mandatory, AdminController.getOneArchiveObject)
+  .delete(AdminController.deleteArchiveObject)
+  .post(AdminController.archiveObject)
 
 export default router

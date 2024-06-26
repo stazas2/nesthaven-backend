@@ -4,6 +4,7 @@ import {
   categoryModels,
   extractFields,
 } from "../utils/index.js"
+import { detailedLocation } from "../utils/index.js"
 
 export const createObject = async (req, res) => {
   try {
@@ -141,7 +142,8 @@ export const updateObject = async (req, res) => {
 //////////////////////////////* АРХИВ
 export const archiveObject = async (req, res) => {
   try {
-    const { _id: objectId, category } = req.body
+    const objectId = req.params.id
+    const category = req.body.category
     const categoryModel = categoryConfig[category].model
 
     const object = await categoryModel.findById(objectId)
@@ -160,6 +162,7 @@ export const archiveObject = async (req, res) => {
 
     res.status(200).json({
       status: "success",
+      message: "Объект успешно добавлен в архив",
     })
   } catch (err) {
     console.log(err)
@@ -176,13 +179,13 @@ export const getArchiveObjects = async (req, res) => {
     if (archiveObjects.length === 0) {
       return res.status(200).json({
         status: "success",
-        message: "Архив пуст",
+        objects: archiveObjects,
       })
     }
 
     res.status(200).json({
       status: "success",
-      archiveObjects,
+      objects: archiveObjects,
     })
   } catch (err) {
     console.log(err)
@@ -217,9 +220,8 @@ export const getOneArchiveObject = async (req, res) => {
 export const deleteArchiveObject = async (req, res) => {
   try {
     const objectId = req.params.id
-    const user = req.userId
 
-    const object = await ArhiveModel.find({ _id: objectId, user })
+    const object = await ArhiveModel.findById(objectId)
     if (!object) {
       return res.status(404).json({
         status: "fail",
@@ -227,11 +229,10 @@ export const deleteArchiveObject = async (req, res) => {
       })
     }
     
-
-    const { category } = object[0]
+    const { category } = object
     const categoryModel = categoryConfig[category].model
 
-    await new categoryModel({ ...object[0].toObject() }).save()
+    await new categoryModel({ ...object.toObject() }).save()
     await ArhiveModel.findByIdAndDelete(objectId)
 
     res.status(200).json({
@@ -246,32 +247,11 @@ export const deleteArchiveObject = async (req, res) => {
 
 export const getPropertyInfo = async (req, res) => {
   try {
-    const detailedLocation = {
-      "Бендеры": ["Центр", "Ленинский", "Солнечный", "Борисовка"],
-      "Тирасполь": ["Центр", "Западный", "Мечникова", "Бородинка", "Южный"],
-      "Григориопольский р-н": ["Глиное", "Маяк", "Спея"],
-      "Дубоссарский р-н": ["Дубоссары", "Кошница", "Ливада", "Новосадовый"],
-      "Каменский р-н": [
-        "Каменка",
-        "Быковцы",
-        "Забродня",
-        "Комаровка",
-        "Коротнево",
-        "Красногорье",
-      ],
-      "Рыбницкий р-н": [
-        "Рыбница",
-        "Бессarabovca",
-        "Бucovățul Nou",
-        "Cuzmir",
-        "Glinjenica",
-      ],
-      "Слободзейский р-н": ["Слободзея", "Larga", "Molodiya", "Novosadovca"],
-    }
+    const location = {...detailedLocation}
 
     res.status(200).json({
       status: "success",
-      location: detailedLocation,
+      location,
     })
   } catch (err) {
     console.log(err)

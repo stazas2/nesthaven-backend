@@ -1,8 +1,15 @@
-import { categoryConfig, categoryModels, sameFields } from "../utils/index.js"
+import {
+  categoryConfig,
+  categoryModels,
+  deleteFieldOr,
+  sameFields,
+  getRandomInt,
+  sendMail,
+  rangeField,
+} from "../utils/index.js"
 import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
 import { UserModel, OtpModel } from "../models/index.js"
-import { rand, sendMail } from "../utils/index.js"
 
 export const register = async (req, res) => {
   try {
@@ -105,7 +112,7 @@ export const forgotPass = async (req, res) => {
     }
 
     const { email } = req.body
-    const code = rand() // Генерация случайного кода
+    const code = getRandomInt() // Генерация случайного кода
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000) // Время истечения
 
     // Сохранение кода в базе данных
@@ -190,32 +197,80 @@ export const getAllObjects = async (req, res) => {
       category,
     } = req.query
 
-    const query = Object.fromEntries(
-      Object.entries(req.query).filter(([key, value]) =>
-        !key.startsWith("_") && value !== "" && category
-          ? categoryConfig[category].fields.includes(key)
-          : sameFields.includes(key)
-      )
+    let query = req.query
+    let modelFields = ""
+
+    if (query.location) {
+      if (Array.isArray(query.location)) {
+        query = {
+          ...query,
+          $or: query.location.map((loc) => ({
+            location: { $regex: loc },
+          })),
+        }
+        delete query.location
+      } else {
+        query.location = {
+          $regex: query.location,
+        }
+      }
+    }
+
+    let rangeValidation = rangeField(query, [
+      "generalArea",
+      "livingArea",
+      "price",
+    ])
+
+    // Фильтрация полей на основе категории и конфигурации
+    const filteredQuery = Object.fromEntries(
+      Object.entries(query).filter(([key, value]) => {
+        // Игнорируем поля, начинающиеся с "_", и пустые значения
+        if (key.startsWith("_") || value === "") {
+          return false
+        }
+
+        //todo
+        //? В отдельную логику (pushFieldOr)
+        // Фильтрация по категории
+        if (category) {
+          modelFields = categoryConfig[category].fields
+          if (key === "$or") {
+            modelFields.push("$or")
+          }
+          return modelFields.includes(key)
+        } else {
+          if (key === "$or") {
+            sameFields.push("$or")
+          }
+          return sameFields.includes(key)
+        }
+      })
     )
 
-    const skipObjects = (_page - 1) * _limit
+    if (category) {
+      deleteFieldOr(modelFields)
+    } else {
+      deleteFieldOr(sameFields)
+    }
+
     const objects = await Promise.all(
-      categoryModels.map((model) => model.find(query))
+      categoryModels.map((model) => model.find(filteredQuery))
     )
-    const filteredObjects = objects
+
+    const sortedObjects = objects
       .filter((result) => result.length !== 0)
       .flat()
+      .sort((a, b) => {
+        if (_order === "asc") {
+          return a[_sort] - b[_sort]
+        } else if (_order === "desc") {
+          return b[_sort] - a[_sort]
+        }
+      })
 
-    const pages = Math.ceil(filteredObjects.length / _limit)
-
-    const sortedObjects = filteredObjects.sort((a, b) => {
-      if (_order === "asc") {
-        return a[_sort] - b[_sort]
-      } else if (_order === "desc") {
-        return b[_sort] - a[_sort]
-      }
-    })
-
+    const pages = Math.ceil(sortedObjects.length / _limit)
+    const skipObjects = (_page - 1) * _limit
     const paginateObjects = sortedObjects.slice(
       skipObjects,
       skipObjects + +_limit
@@ -228,7 +283,9 @@ export const getAllObjects = async (req, res) => {
       })
     }
 
-    const exludeUserFields = "-passwordHash -__v -createdAt -updatedAt"
+    const exludeUserFields = "-passwordHash -__v -createdAt -updatedAt -agree"
+    //todo
+    //? использоваться .populate('user')
     const paginateObjectsWithUser = await Promise.all(
       paginateObjects.map(async (object) => {
         const user = await UserModel.findById(object.user).select(
@@ -238,16 +295,25 @@ export const getAllObjects = async (req, res) => {
       })
     )
 
-    res.status(200).json({
+    //? Добавление логики в случае неверного диапазона
+    let response = {}
+    if (!rangeValidation[0]) {
+      response.message = "Невалидный диапазон для поля: " + rangeValidation[1]
+    }
+
+    response = {
       status: "success",
-      filter: query,
+      ...response,
+      filter: filteredQuery,
       page: _page,
       limit: _limit,
       amountPages: pages,
       sort: _sort,
       order: _order,
       objects: paginateObjectsWithUser,
-    })
+    }
+
+    res.status(200).json(response)
   } catch (err) {
     console.log(err)
     res.status(500).json({
@@ -262,7 +328,7 @@ export const getOneObject = async (req, res) => {
     let object = null
 
     for (let model of categoryModels) {
-      object = await model.findById(objectId)
+      object = await model.findByIdAndUpdate(objectId, { $inc: { viewsCount: 1 } })
       if (object) break
     }
 
@@ -273,7 +339,7 @@ export const getOneObject = async (req, res) => {
       })
     }
 
-    const exludeUserFields = "-passwordHash -__v -createdAt -updatedAt"
+    const exludeUserFields = "-passwordHash -__v -createdAt -updatedAt -agree"
     const user = await UserModel.findById(object.user).select(exludeUserFields)
 
     // Similar objects
@@ -287,9 +353,6 @@ export const getOneObject = async (req, res) => {
 
     const similarObjectsWithUser = await Promise.all(
       similarObjects.map(async (object) => {
-        const user = await UserModel.findById(object.user).select(
-          exludeUserFields
-        )
         return { ...object._doc, user }
       })
     )
@@ -433,9 +496,20 @@ export const getFavourites = async (req, res) => {
       categoryModels.map((model) => model.find({ _id: { $in: favouriteIds } }))
     )
 
-    const favouriteObjects = objects
+    let favouriteObjects = objects
       .filter((result) => result.length !== 0)
       .flat()
+
+    if (userId) {
+      const exludeUserFields =
+        "-passwordHash -__v -createdAt -updatedAt -agree -favouriteObject"
+      const user = await UserModel.findById(userId).select(exludeUserFields)
+      favouriteObjects = await Promise.all(
+        favouriteObjects.map(async (object) => {
+          return { ...object._doc, user }
+        })
+      )
+    }
 
     if (favouriteObjects.length === 0) {
       return res.status(200).json({
@@ -493,6 +567,68 @@ export const sendMessage = async (req, res) => {
     res
       .status(200)
       .json({ status: "success", message: "Письмо успешно отправлено" })
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({
+      status: "fail",
+    })
+  }
+}
+
+export const getHelp = async (req, res) => {
+  try {
+    const { name, phone, email, message } = req.body
+
+    let mailMessage = `
+    <div style="font-family: Arial, sans-serif; color: #333;">
+      <p style="font-size: 16px;">Сообщение в поддержку от «<span style="color: blue">${email}</span>»:</p>
+      <p style="font-size: 18px;"><strong>${message}</strong></p>
+      <p style="font-size: 14px; color: #777;">${name} <br> ${phone}</p>
+    </div>
+  `
+    //? Email поддержки
+    let mail = `cvetlana-malysheva@mail.ru`
+
+    sendMail(mail, "Служба поддержки", mailMessage)
+
+    // Отправляем успешный ответ
+    res
+      .status(200)
+      .json({ status: "success", message: "Письмо успешно отправлено" })
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({
+      status: "fail",
+    })
+  }
+}
+
+export const getPopularObjects = async (req, res) => {
+  try {
+    const objects = await Promise.all(
+      categoryModels.map((model) =>
+        model.find().sort({ viewsCount: -1 })
+      )
+    )
+
+    const popularObjects = objects
+    //.filter((object) => object.viewsCount >= 2)
+      .filter((result) => result.length !== 0)
+      .flat()
+      .filter((object) => object.viewsCount >= 2)
+      .slice(0, 5)
+
+    if (popularObjects.length === 0) {
+      return res.status(200).json({
+        status: "success",
+        objects: popularObjects,
+      })
+    }
+
+    res.status(200).json({
+      status: "success",
+      objects: popularObjects,
+    })
   } catch (err) {
     console.log(err)
     res.status(500).json({
