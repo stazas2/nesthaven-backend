@@ -1,4 +1,7 @@
-# Используем официальный образ Node.js в качестве базового
+# Используем образ с Google Cloud SDK
+FROM google/cloud-sdk
+
+# Используем node:20 как основу
 FROM node:20
 
 # Создаем рабочую директорию внутри контейнера
@@ -9,9 +12,6 @@ COPY package*.json ./
 
 # Устанавливаем зависимости проекта с помощью npm
 RUN npm install
-
-# Устанавливаем Google Cloud SDK
-RUN apt-get update && apt-get install -y google-cloud-sdk
 
 # Копируем все файлы проекта в рабочую директорию
 COPY . .
