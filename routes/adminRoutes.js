@@ -21,7 +21,7 @@ router
 router
   .route("/admin/:id")
   .get(checkAuth.mandatory, AdminController.getOneObject)
-  .patch(checkAuth.mandatory, categoryRules, handleValidationError, AdminController.updateObject)
+  .patch(categoryRules, handleValidationError, AdminController.updateObject)
   .delete(AdminController.deleteObject)
 
 router.get("/location", AdminController.getPropertyInfo)

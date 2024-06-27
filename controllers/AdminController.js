@@ -11,13 +11,13 @@ export const createObject = async (req, res) => {
     const category = req.body.category
     const userId = { user: req.userId }
 
-    const { telegram, whatsApp } = req.body
-    console.log(telegram)
-    const user = ''
+    const { telegram, whatsApp } = await UserModel.findById(req.userId)
+
+    // const { telegram, whatsApp } = req.body
+
     if (telegram || whatsApp) {
-      user = await UserModel.findByIdAndUpdate(req.userId, {telegram, whatsApp}, {new: true})
+      await UserModel.findByIdAndUpdate(req.userId, {telegram, whatsApp}, {new: true})
     }
-    console.log(user)
 
     const config = categoryConfig[category]
     if (!config) {
@@ -79,9 +79,11 @@ export const getOneObject = async (req, res) => {
       })
     }
 
+    const { telegram, whatsApp } = await UserModel.findById(req.userId)
+
     res.status(200).json({
       status: "success",
-      object,
+      object: {...object._doc, telegram, whatsApp}, 
     })
   } catch (err) {
     console.log(err)
@@ -121,16 +123,9 @@ export const updateObject = async (req, res) => {
     const objectId = req.params.id
     const category = req.body.category
 
-    const { telegram, whatsApp } = req.body
-    console.log(telegram)
-    let user = ''
-    if (telegram || whatsApp) {
-      user = await UserModel.findByIdAndUpdate(req.userId, {telegram, whatsApp}, {new: true})
-    }
-    console.log(user)
-
     const categoryModel = categoryConfig[category].model
     const updateFields = extractFields(category, req.body)
+
 
     const object = await categoryModel.findByIdAndUpdate(
       objectId,
