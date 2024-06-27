@@ -26,6 +26,14 @@ const UserSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+    telegram: {
+      type: String,
+      default: "",
+    },
+    whatsApp: {
+      type: String,
+      default: "",
+    },
   },
   {
     timestamps: true,

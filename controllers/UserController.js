@@ -283,7 +283,7 @@ export const getAllObjects = async (req, res) => {
       })
     }
 
-    const exludeUserFields = "-passwordHash -__v -createdAt -updatedAt -agree"
+    const exludeUserFields = "-passwordHash -__v -createdAt -updatedAt -agree -whatsApp -telegram"
     //todo
     //? использоваться .populate('user')
     const paginateObjectsWithUser = await Promise.all(
