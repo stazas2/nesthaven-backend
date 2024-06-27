@@ -7,24 +7,6 @@ export const getRandomInt = () => {
   return number
 }
 
-// export const rangeField = (query, [field]) => {
-//   if (!(query[field + "From"] || query[field + "To"])) return
-
-//   const fieldFrom = query[field + "From"]
-//   const fieldTo = query[field + "To"]
-
-//   if (fieldFrom && fieldTo) {
-//     query[field] = { $gte: +fieldFrom, $lte: +fieldTo }
-//     delete query[field + "From"]
-//     delete query[field + "To"]
-//   } else if (fieldFrom) {
-//     query[field] = { $gte: +fieldFrom }
-//     delete query[field + "From"]
-//   } else if (fieldTo) {
-//     query[field] = { $lte: +fieldTo }
-//     delete query[field + "To"]
-//   }
-// }
 
 export const rangeField = (query, field) => {
   let validation = [true]

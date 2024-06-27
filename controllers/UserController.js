@@ -191,7 +191,7 @@ export const getAllObjects = async (req, res) => {
   try {
     const {
       _page = 1,
-      _limit = 15,
+      _limit = 10,
       _sort = "createdAt",
       _order = "desc",
       category,

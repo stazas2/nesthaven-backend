@@ -1,4 +1,4 @@
-import { ArhiveModel } from "../models/index.js"
+import { ArhiveModel, UserModel } from "../models/index.js"
 import {
   categoryConfig,
   categoryModels,
@@ -10,6 +10,14 @@ export const createObject = async (req, res) => {
   try {
     const category = req.body.category
     const userId = { user: req.userId }
+
+    const { telegram, whatsApp } = req.body
+    console.log(telegram)
+    const user = ''
+    if (telegram || whatsApp) {
+      user = await UserModel.findByIdAndUpdate(req.userId, {telegram, whatsApp}, {new: true})
+    }
+    console.log(user)
 
     const config = categoryConfig[category]
     if (!config) {
@@ -112,6 +120,14 @@ export const updateObject = async (req, res) => {
   try {
     const objectId = req.params.id
     const category = req.body.category
+
+    const { telegram, whatsApp } = req.body
+    console.log(telegram)
+    let user = ''
+    if (telegram || whatsApp) {
+      user = await UserModel.findByIdAndUpdate(req.userId, {telegram, whatsApp}, {new: true})
+    }
+    console.log(user)
 
     const categoryModel = categoryConfig[category].model
     const updateFields = extractFields(category, req.body)
